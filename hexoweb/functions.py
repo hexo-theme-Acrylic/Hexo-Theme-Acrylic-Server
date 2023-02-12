@@ -110,12 +110,12 @@ def get_custom_config():
     context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
     if not context["QEXO_LOGO"]:
         save_setting('QEXO_LOGO',
-                     'https://avatars.githubusercontent.com/u/124778279?s=200&v=4')
+                     'https://s3.bmp.ovh/imgs/2022/11/23/129c19d56d22c637.png')
         context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
     context["QEXO_ICON"] = get_setting("QEXO_ICON")
     if not context["QEXO_ICON"]:
         save_setting('QEXO_ICON',
-                     'https://avatars.githubusercontent.com/u/124778279?s=200&v=4')
+                     'https://s3.bmp.ovh/imgs/2022/11/23/129c19d56d22c637.png')
         context["QEXO_ICON"] = get_setting("QEXO_ICON")
     return context
 
