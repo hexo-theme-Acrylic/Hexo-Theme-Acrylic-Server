@@ -100,23 +100,23 @@ def get_cdnjs():
 # 获取用户自定义的样式配置
 def get_custom_config():
     context = {"cdn_prev": get_cdn(), "cdnjs": get_cdnjs(), "QEXO_NAME": get_setting("QEXO_NAME")}
-    # if not context["QEXO_NAME"]:
-    #     save_setting('QEXO_NAME', 'Hexo管理面板')
-    #     context["QEXO_NAME"] = get_setting("QEXO_NAME")
-    # context["QEXO_SPLIT"] = get_setting("QEXO_SPLIT")
-    # if not context["QEXO_SPLIT"]:
-    #     save_setting('QEXO_SPLIT', ' - ')
-    #     context["QEXO_SPLIT"] = get_setting("QEXO_SPLIT")
-    # context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
-    # if not context["QEXO_LOGO"]:
-    #     save_setting('QEXO_LOGO',
-    #                  'https://avatars.githubusercontent.com/u/124778279?s=200&v=4')
-    #     context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
-    # context["QEXO_ICON"] = get_setting("QEXO_ICON")
-    # if not context["QEXO_ICON"]:
-    #     save_setting('QEXO_ICON',
-    #                  'https://avatars.githubusercontent.com/u/124778279?s=200&v=4')
-    #     context["QEXO_ICON"] = get_setting("QEXO_ICON")
+    if not context["QEXO_NAME"]:
+        save_setting('QEXO_NAME', 'Hexo管理面板')
+        context["QEXO_NAME"] = get_setting("QEXO_NAME")
+    context["QEXO_SPLIT"] = get_setting("QEXO_SPLIT")
+    if not context["QEXO_SPLIT"]:
+        save_setting('QEXO_SPLIT', ' - ')
+        context["QEXO_SPLIT"] = get_setting("QEXO_SPLIT")
+    context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
+    if not context["QEXO_LOGO"]:
+        save_setting('QEXO_LOGO',
+                     'https://s3.bmp.ovh/imgs/2022/11/23/129c19d56d22c637.png')
+        context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
+    context["QEXO_ICON"] = get_setting("QEXO_ICON")
+    if not context["QEXO_ICON"]:
+        save_setting('QEXO_ICON',
+                     'https://s3.bmp.ovh/imgs/2022/11/23/129c19d56d22c637.png')
+        context["QEXO_ICON"] = get_setting("QEXO_ICON")
     return context
 
 
