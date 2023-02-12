@@ -110,14 +110,12 @@ def get_custom_config():
     context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
     if not context["QEXO_LOGO"]:
         save_setting('QEXO_LOGO',
-                     'https://unpkg.com/qexo-static@1.4.0/assets' +
-                     '/img/brand/qexo.png')
+                     'https://avatars.githubusercontent.com/u/124778279?s=200&v=4')
         context["QEXO_LOGO"] = get_setting("QEXO_LOGO")
     context["QEXO_ICON"] = get_setting("QEXO_ICON")
     if not context["QEXO_ICON"]:
         save_setting('QEXO_ICON',
-                     'https://unpkg.com/qexo-static@1.4.0/assets' +
-                     '/img/brand/favicon.ico')
+                     'https://avatars.githubusercontent.com/u/124778279?s=200&v=4')
         context["QEXO_ICON"] = get_setting("QEXO_ICON")
     return context
 
