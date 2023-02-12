@@ -1,0 +1,8 @@
+.vercel
+*.py[cod]
+.idea
+tmp
+venv
+hexoweb/migrations
+staticfiles_build
+./configs.py

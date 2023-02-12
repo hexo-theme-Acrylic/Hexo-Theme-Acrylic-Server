@@ -1,0 +1,1429 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} 设置 {% endblock title %}
+
+{% block content %}
+
+    <div class="header bg-primary pb-6">
+        <div class="container-fluid">
+            <div class="header-body">
+                <div class="row align-items-center py-4">
+                    <div class="col-lg-6 col-7">
+                        <h6 class="h2 text-white d-inline-block mb-0">设置中心</h6>
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                            <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a>
+                                </li>
+                                <li class="breadcrumb-item active">设置</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="col-lg-6 col-5 text-right">
+                        <a href="/" class="btn btn-sm btn-neutral">主页</a>
+                        <a href="/userscripts.html" class="btn btn-sm btn-neutral">云端命令</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h3 class="mb-0">修改配置</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="pl-lg-4">
+                                <input type="button" class="btn btn-primary" value="一键设置WEBHOOK"
+                                       onclick="query_webhook()">
+                            </div>
+                            <div class="pl-lg-4">
+                                <a class="btn btn-danger" href="/advanced.html">高级设置</a>
+                            </div>
+                            <div class="pl-lg-4">
+                                <input type="button" class="btn btn-warning" value="清除缓存"
+                                       onclick="query_purge()">
+                            </div>
+                            <div class="pl-lg-4">
+                                <input type="button" class="btn btn-danger" value="一键更新"
+                                       onclick="query_update()">
+                            </div>
+                        </div>
+                        <form id="apikey-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">API配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">API密钥</label>
+                                            <input type="text" name="apikey" class="form-control"
+                                                   placeholder="留空将保持不变">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">启用友链申请API</label>
+                                            <select name="allow_friend" class="form-control">
+                                                <option{% if ALLOW_FRIEND == "是" %}
+                                                    selected{% endif %}>是
+                                                </option>
+                                                <option{% if ALLOW_FRIEND != "是" %}
+                                                    selected{% endif %}>否
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label
+                                                    class="form-control-label">使用 reCaptcha
+                                                验证友链申请</label>
+                                            <select name="friend-recaptcha" class="form-control">
+                                                <option{% if FRIEND_RECAPTCHA == "v2" %}
+                                                    selected{% endif %}>v2
+                                                </option>
+                                                <option{% if FRIEND_RECAPTCHA == "v3" %}
+                                                    selected{% endif %}>v3
+                                                </option>
+                                                <option{% if FRIEND_RECAPTCHA == "关闭" %}
+                                                    selected{% endif %}>关闭
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">reCaptcha 密钥</label>
+                                            <input type="text" name="recaptcha-token"
+                                                   class="form-control"
+                                                   placeholder="reCaptchaV3 服务器端 Token"
+                                                   value="{{ RECAPTCHA_TOKEN }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_api()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="statistic-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">统计配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">启用统计API</label>
+                                            <select name="allow_statistic" class="form-control">
+                                                <option{% if STATISTIC_ALLOW == "是" %}
+                                                    selected{% endif %}>是
+                                                </option>
+                                                <option{% if STATISTIC_ALLOW != "是" %}
+                                                    selected{% endif %}>否
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">统计安全域名</label>
+                                            <input type="text" name="statistic_domains"
+                                                   class="form-control"
+                                                   placeholder="输入域名包含的关键字, 英文半角逗号间隔"
+                                                   value="{{ STATISTIC_DOMAINS }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_statistic()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="user-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">用户配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">原密码</label>
+                                            <input type="text" name="password" class="form-control"
+                                                   placeholder="原密码">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">新用户名</label>
+                                            <input type="text" name="username" class="form-control"
+                                                   placeholder="新的用户名">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">新密码</label>
+                                            <input type="text" name="newpassword"
+                                                   class="form-control"
+                                                   placeholder="新的密码">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">重复密码</label>
+                                            <input type="text" name="repassword"
+                                                   class="form-control"
+                                                   placeholder="再次输入以确认密码">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_user_config()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="security-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">安全配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">登录页 reCaptchaV3
+                                                用户端密钥</label>
+                                            <input type="text" name="site-token"
+                                                   class="form-control"
+                                                   placeholder="留空即关闭该功能"
+                                                   value="{{ LOGIN_RECAPTCHA_SITE_TOKEN }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">登录页 reCaptchaV3
+                                                服务器端密钥</label>
+                                            <input type="text" name="server-token"
+                                                   class="form-control"
+                                                   placeholder="留空即关闭该功能"
+                                                   value="{{ LOGIN_RECAPTCHA_SERVER_TOKEN }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_security_config()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="hexo-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">博客配置</h6>
+                            <div class="pl-lg-4">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">服务商</label>
+                                            <select name="provider" id="provider-container"
+                                                    class="form-control"
+                                                    onchange="change_provider(this.value)">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">使用配置</label>
+                                            <select name="config" id="config-container"
+                                                    class="form-control">
+                                                {% for config in ALL_PLATFORM_CONFIGS %}
+                                                <option value="{{ config }}">{{ config }}</option>
+                                                {% endfor %}
+                                            </select>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="hexo-settings-container"></div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_hexo()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="notify-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">消息配置</h6>
+                            <div class="pl-lg-4">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">服务商</label>
+                                            <select name="notifier" id="onepush-container"
+                                                    class="form-control"
+                                                    onchange="change_pusher(this.value)">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="onepush-settings-container"></div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_onepush()">
+                                        <input type="button" class="btn btn-info" value="测试"
+                                               onclick="test_onepush()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="abbrlink-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">短链接配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">短链接算法</label>
+                                            <select name="alg" class="form-control">
+                                                <option{% if ABBRLINK_ALG == "crc16" %}
+                                                    selected{% endif %}>crc16
+                                                </option>
+                                                <option{% if ABBRLINK_ALG == "crc32" %}
+                                                    selected{% endif %}>crc32
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">短链接进制</label>
+                                            <select name="rep" class="form-control">
+                                                <option{% if ABBRLINK_REP == "hex" %}
+                                                    selected{% endif %}>hex
+                                                </option>
+                                                <option{% if ABBRLINK_REP == "dec" %}
+                                                    selected{% endif %}>dec
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_abbrlink_config()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="excerpt-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">自动截取配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <label class="form-control-label">保存时自动截取</label>
+                                        <select class="form-control" name="EXCERPT_POST"
+                                                id="excerpt-post">
+                                            <option{% if EXCERPT_POST == "是" %} selected
+                                            {% endif %}>是
+                                            </option>
+                                            <option{% if EXCERPT_POST != "是" %} selected
+                                            {% endif %}>否
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">截取长度</label>
+                                            <input type="text" name="EXCERPT_LENGTH"
+                                                   class="form-control"
+                                                   placeholder="截取文字长度"
+                                                   value="{{ EXCERPT_LENGTH }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_excerpt()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="image-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">图床配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床类型</label>
+                                            <select name="image-type" id="image-type"
+                                                    class="form-control"
+                                                    onchange="change_image_host(this.value)">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="image-host-container"></div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_image_host()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="cdn-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">CDN配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">CDN 提供商</label>
+                                            <select class="form-control" name="CDNJS"
+                                                    id="cdnjs">
+                                                {% for cdn in ALL_CDN %}
+                                                    <option{% if cdn.url == cdnjs %}
+                                                        selected{% endif %} value="{{ cdn.url }}"
+                                                    >{{ cdn.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_cdn()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="cust-settings" onsubmit="return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">自定义配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点名称</label>
+                                            <input type="text" name="name" class="form-control"
+                                                   placeholder="默认为 Hexo管理面板"
+                                                   value="{{ QEXO_NAME }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点连接符</label>
+                                            <input type="text" name="split" class="form-control"
+                                                   placeholder="默认为“ - ”"
+                                                   value="{{ QEXO_SPLIT }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点 LOGO</label>
+                                            <input type="text" name="logo"
+                                                   class="form-control"
+                                                   placeholder="默认为 brand 下的 Qexo.png"
+                                                   value="{{ QEXO_LOGO }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点 ICON</label>
+                                            <input type="text" name="icon"
+                                                   class="form-control"
+                                                   placeholder="默认为 brand 下的 favicon.ico"
+                                                   value="{{ QEXO_ICON }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_cust_config()">
+                                        <input type="button" class="btn btn-white" value="重置"
+                                               onclick="query_reset_cust()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="queryModal" tabindex="-1" aria-labelledby="queryModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryModalLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <a id="question"></a>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="purge()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="queryWebhook" tabindex="-1" aria-labelledby="queryWebhookLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryWebhookLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        确定要自动创建Webhook事件吗？这会清除您原仓库的所有Webhook事件
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="create_webhook()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="queryUpdate" tabindex="-1" aria-labelledby="queryUpdateLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryWebhookLabel">更新</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col">
+                            <label class="form-control-label">更新通道</label>
+                            <select class="form-control" id="update-origin-branch">
+                                {% for update in ALL_UPDATES %}
+                                    <option>{{ update.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="do_update()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="queryResetCust" tabindex="-1"
+             aria-labelledby="queryResetCustLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryResetCustLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        确定要重置自定义配置吗？该操作不可回退
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="reset_cust_config()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "includes/footer.html" %}
+
+    </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+
+    <script>
+        function getBaseUrl() {
+            let ishttps = 'https:' == document.location.protocol ? true : false;
+            let url = window.location.host;
+            if (ishttps) {
+                url = 'https://' + url;
+            } else {
+                url = 'http://' + url;
+            }
+            return url;
+        }
+
+        function set_hexo() {
+            let loading = new KZ_Loading('正在校验并保存中...');
+            loading.show();
+            let form = $('#hexo-settings').serializeArray();
+            let params = {};
+            for (let i = 0; i < form.length; i++) {
+                params[form[i]["name"]] = form[i]["value"];
+            }
+            delete params["provider"]; // remove provider name from params array
+            delete params["csrfmiddlewaretoken"]; // remove the CSRF token from params array
+            $.ajax({
+                url: '/api/set_hexo/',
+                method: 'post',
+                data: {
+                    "provider": JSON.stringify({
+                        "provider": $("#provider-container").val(),
+                        "params": params
+                    })
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                        now_provider = {
+                            "provider": $("#provider-container").val(),
+                            "params": params
+                        };
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function submit_user_config() {
+            if (!$("input[name='username']").val()) {
+                notyf.error("请输入正确的用户名！");
+                return false;
+            }
+            if (!$("input[name='password']").val()) {
+                notyf.error("原密码不能为空！");
+                return false;
+            }
+            if (!$("input[name='newpassword']").val()) {
+                notyf.error("请输入正确的新密码！");
+                return false;
+            }
+            if ($("input[name='newpassword']").val() != $("input[name='repassword']").val()) {
+                notyf.error("两次输入的密码不相同！");
+                return false;
+            }
+            let loading = new KZ_Loading('正在校验并保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_user/',
+                method: 'post',
+                data: $('#user-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                        setTimeout(location.reload(), 1000);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_image_host() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            let form = $('#image-settings').serializeArray();
+            let params = {};
+            for (let i = 0; i < form.length; i++) {
+                params[form[i]["name"]] = form[i]["value"];
+            }
+            delete params["image-type"]; // remove provider name from params array
+            delete params["csrfmiddlewaretoken"]; // remove the CSRF token from params array
+            $.ajax({
+                url: '/api/set_image_host/',
+                method: 'post',
+                data: {
+                    "image_host": JSON.stringify({
+                        "type": $("#image-type").val(),
+                        "params": params
+                    })
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function query_purge() {
+            $("#question").text("确定清除所有缓存吗");
+            $("#queryModal").modal("show");
+        }
+
+        function query_webhook() {
+            $("#queryWebhook").modal("show");
+        }
+
+        function query_update() {
+            $("#queryUpdate").modal("show");
+        }
+
+        function query_reset_cust() {
+            $("#queryResetCust").modal("show");
+        }
+
+        function purge() {
+            let loading = new KZ_Loading('正在清除中...');
+            loading.show();
+            $.ajax({
+                url: '/api/purge/',
+                method: 'get',
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function create_webhook() {
+            let loading = new KZ_Loading('正在设置中...');
+            loading.show();
+            $.ajax({
+                url: '/api/create_webhook/',
+                method: 'post',
+                data: {
+                    "csrfmiddlewaretoken": "{{ csrf_token }}", "uri": getBaseUrl() + "/api/webhook/"
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_cdn() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_cdn/',
+                method: 'post',
+                data: {"cdn": $("#cdnjs").val()},
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function submit_cust_config() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_cust/',
+                method: 'post',
+                data: $('#cust-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function reset_cust_config() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_cust/',
+                method: 'post',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}', 'logo': 'https://cdn.jsdelivr' +
+                        '.net/npm/qexo-static@1.4.0/assets/img/brand/qexo.png', 'icon':
+                        'https://cdn.jsdelivr' +
+                        '.net/npm/qexo-static@1.4.0/assets/img/brand/favicon.ico',
+                    'name': 'Hexo管理面板', 'split': ' - '
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_excerpt() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_excerpt/',
+                method: 'post',
+                data: $('#excerpt-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_api() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_api/',
+                method: 'post',
+                data: $('#apikey-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_statistic() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_statistic/',
+                method: 'post',
+                data: $('#statistic-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_onepush() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            let form = $('#notify-settings').serializeArray();
+            let params = {};
+            for (let i = 0; i < form.length; i++) {
+                if (form[i]["value"]) {
+                    params[form[i]["name"]] = form[i]["value"];
+                }
+            }
+            delete params["notifier"]; // remove notifier name from params array
+            delete params["csrfmiddlewaretoken"]; // remove the CSRF token from params array
+            $.ajax({
+                url: '/api/set_onepush/',
+                method: 'post',
+                data: {
+                    "onepush": JSON.stringify({
+                        "notifier": $("#onepush-container").val(),
+                        "params": params
+                    })
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                        now_pusher = {
+                            "notifier": $("#onepush-container").val(),
+                            "params": params
+                        };
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function test_onepush() {
+            let loading = new KZ_Loading('正在请求中...');
+            loading.show();
+            let form = $('#notify-settings').serializeArray();
+            let params = {};
+            for (let i = 0; i < form.length; i++) {
+                if (form[i]["value"]) {
+                    params[form[i]["name"]] = form[i]["value"];
+                }
+            }
+            delete params["notifier"]; // remove notifier name from params array
+            delete params["csrfmiddlewaretoken"]; // remove the CSRF token from params array
+            $.ajax({
+                url: '/api/test_onepush/',
+                method: 'post',
+                data: {
+                    "onepush": JSON.stringify({
+                        "notifier": $("#onepush-container").val(),
+                        "params": params
+                    })
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function submit_abbrlink_config() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_abbrlink/',
+                method: 'post',
+                data: $('#abbrlink-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function submit_security_config() {
+            let loading = new KZ_Loading('正在保存中... ');
+            loading.show();
+            $.ajax({
+                url: '/api/set_security/',
+                method: 'post',
+                data: $('#security-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function do_update() {
+            let loading = new KZ_Loading('正在尝试更新...');
+            loading.show();
+            $.ajax({
+                url: '/api/do_update/',
+                method: 'post',
+                dataType: "json",
+                data: {
+                    "branch": $("#update-origin-branch").val(), csrfmiddlewaretoken:
+                        '{{ csrf_token }}'
+                },
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        const all_providers = {{ all_providers | safe }};
+        {% if PROVIDER %}
+            var now_provider = {{ PROVIDER | safe }};
+        {% else %}
+            var now_provider = "";
+        {% endif %}
+        function change_provider(provider) {
+            let params = all_providers[provider];
+            let t = 0;
+            let html = '';
+            if (provider === now_provider["provider"]) {
+                for (let key in params) {
+                    if (t % 2 === 0) {  // first param
+                        html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` +
+                            params[key]["description"] +
+                            `</label>
+                                        <input type="text" name="` + key + `" class="form-control"
+                                               placeholder="` + params[key]["placeholder"] + `"
+                                               value="` + escapeString(now_provider["params"][key]) + `">
+                                    </div>
+                                </div>`
+                        t += 1;
+                    } else {
+                        html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + params[key]["description"] + `</label>
+                                    <input type="text" name="` + key + `" class="form-control"
+                                           placeholder="` + params[key]["placeholder"] + `"
+                                           value="` + escapeString(now_provider["params"][key]) + `">
+                                </div>
+                            </div>
+                        </div>`
+                        t += 1;
+                    }
+                }
+                if (t % 2 === 1) {
+                    html += '</div>';
+                }
+            } else {
+                for (let key in params) {
+                    if (t % 2 === 0) {  // first param
+                        html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` + params[key]["description"] + `</label>
+                                        <input type="text" name="` + key + `" class="form-control"
+                                               placeholder="` + params[key]["placeholder"] + `"
+                                               value="">
+                                    </div>
+                                </div>`
+                        t += 1;
+                    } else {
+                        html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + params[key]["description"] + `</label>
+                                    <input type="text" name="` + key + `" class="form-control"
+                                           placeholder="` + params[key]["placeholder"] + `"
+                                           value="">
+                                </div>
+                            </div>
+                        </div>`
+                        t += 1;
+                    }
+                }
+                if (t % 2 === 1) {
+                    html += '</div>';
+                }
+            }
+            $("#hexo-settings-container").html(html);
+        }
+
+        let provider_container = "";
+        for (let key in all_providers) {
+            if (now_provider["provider"] === key) {
+                provider_container += `<option selected>` + key + `</option>`;
+                change_provider(key);
+            } else {
+                provider_container += `<option>` + key + `</option>`;
+            }
+        }
+        if (!now_provider["provider"]) {
+            change_provider("github");
+        }
+        $("#provider-container").html(provider_container);
+
+
+        {% if ONEPUSH %}
+            var now_pusher = {{ ONEPUSH | safe }};
+        {% else %}
+            var now_pusher = "";
+        {% endif %}
+        const all_pushers = {{ all_pushers | safe }};
+
+        function change_pusher(pusher) {
+            let params = all_pushers[pusher];
+            if (typeof params !== "object") {
+                console.log("获取Pusher失败，显示Bark");
+                params = all_pushers["Bark"];
+            }
+            let t = 0, tmp;
+            let html = '';
+            let required = params["required"];
+            let optional = params["optional"];
+            if (pusher === now_pusher["notifier"]) {
+                if (typeof required === "object") {
+                    for (let i = 0; i < required.length; i++) {
+                        tmp = now_pusher["params"][required[i]] ?
+                            now_pusher["params"][required[i]] : "";
+                        if (t % 2 === 0) {  // first param
+                            html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` + required[i] + `(必填)
+                                        </label>
+                                        <input type="text" name="` + required[i] + `" class="form-control"
+                                               placeholder="` + required[i] + `"
+                                               value="` + escapeString(tmp) + `">
+                                    </div>
+                                </div>`
+                            t += 1;
+                        } else {
+                            html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + required[i] + `(必填)</label>
+                                    <input type="text" name="` + required[i] + `" class="form-control"
+                                           placeholder="` + required[i] + `"
+                                           value="` + escapeString(tmp) + `">
+                                </div>
+                            </div>
+                        </div>`
+                            t += 1;
+                        }
+                    }
+                }
+                if (typeof optional === "object") {
+                    for (let i = 0; i < optional.length; i++) {
+                        tmp = now_pusher["params"][optional[i]] ?
+                            now_pusher["params"][optional[i]] : "";
+                        if (t % 2 === 0) {  // first param
+                            html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` + optional[i] + `</label>
+                                        <input type="text" name="` + optional[i] + `" class="form-control"
+                                               placeholder="` + optional[i] + `"
+                                               value="` + escapeString(tmp) + `">
+                                    </div>
+                                </div>`
+                            t += 1;
+                        } else {
+                            html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + optional[i] + `</label>
+                                    <input type="text" name="` + optional[i] + `" class="form-control"
+                                           placeholder="` + optional[i] + `"
+                                           value="` + escapeString(tmp) + `">
+                                </div>
+                            </div>
+                        </div>`
+                            t += 1;
+                        }
+                    }
+                }
+                if (t % 2 === 1) {
+                    html += '</div>';
+                }
+            } else {
+                if (typeof required === "object") {
+                    for (let i = 0; i < required.length; i++) {
+                        if (t % 2 === 0) {  // first param
+                            html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` + required[i] + `(必填)
+                                        </label>
+                                        <input type="text" name="` + required[i] + `" class="form-control"
+                                               placeholder="` + required[i] + `"
+                                               value="">
+                                    </div>
+                                </div>`
+                            t += 1;
+                        } else {
+                            html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + required[i] + `(必填)</label>
+                                    <input type="text" name="` + required[i] + `" class="form-control"
+                                           placeholder="` + required[i] + `"
+                                           value="">
+                                </div>
+                            </div>
+                        </div>`
+                            t += 1;
+                        }
+                    }
+                }
+                if (typeof optional === "object") {
+                    for (let i = 0; i < optional.length; i++) {
+                        if (t % 2 === 0) {  // first param
+                            html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` + optional[i] +
+                                `</label>
+                                        <input type="text" name="` + optional[i] + `" class="form-control"
+                                               placeholder="` + optional[i] + `"
+                                               value="">
+                                    </div>
+                                </div>`
+                            t += 1;
+                        } else {
+                            html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + optional[i] + `</label>
+                                    <input type="text" name="` + optional[i] + `" class="form-control"
+                                           placeholder="` + optional[i] + `"
+                                           value="">
+                                </div>
+                            </div>
+                        </div>`
+                            t += 1;
+                        }
+                    }
+                }
+                if (t % 2 === 1) {
+                    html += '</div>';
+                }
+            }
+            $("#onepush-settings-container").html(html);
+        }
+
+        let onepush_container = "";
+        for (let key in all_pushers) {
+            if (now_pusher["notifier"] === key) {
+                onepush_container += `<option selected>` + key + `</option>`;
+                change_pusher(key);
+            } else {
+                onepush_container += `<option>` + key + `</option>`;
+            }
+        }
+        if (!now_pusher["notifier"]) {
+            change_pusher("Bark");
+        }
+        $("#onepush-container").html(onepush_container);
+
+        const all_image_hosts = {{ all_image_hosts | safe }};
+        {% if IMG_HOST %}
+            var now_image_host = {{ IMG_HOST | safe }};
+        {% else %}
+            var now_image_host = "";
+        {% endif %}
+        function change_image_host(provider) {
+            let params = all_image_hosts[provider];
+            let t = 0;
+            let html = '';
+            if (provider === "关闭") {
+                $("#image-host-container").html(html);
+                return;
+            }
+            if (provider === now_image_host["type"]) {
+                for (let key in params) {
+                    if (t % 2 === 0) {  // first param
+                        html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` +
+                            params[key]["description"] +
+                            `</label>
+                                        <input type="text" name="` + key + `" class="form-control"
+                                               placeholder="` + params[key]["placeholder"] + `"
+                                               value="` + escapeString
+                            (now_image_host["params"][key]) + `">
+                                    </div>
+                                </div>`
+                        t += 1;
+                    } else {
+                        html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + params[key]["description"] + `</label>
+                                    <input type="text" name="` + key + `" class="form-control"
+                                           placeholder="` + params[key]["placeholder"] + `"
+                                           value="` + escapeString(now_image_host["params"][key])
+                            + `">
+                                </div>
+                            </div>
+                        </div>`
+                        t += 1;
+                    }
+                }
+                if (t % 2 === 1) {
+                    html += '</div>';
+                }
+            } else {
+                for (let key in params) {
+                    if (t % 2 === 0) {  // first param
+                        html += `<div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label">` + params[key]["description"] + `</label>
+                                        <input type="text" name="` + key + `" class="form-control"
+                                               placeholder="` + params[key]["placeholder"] + `"
+                                               value="">
+                                    </div>
+                                </div>`
+                        t += 1;
+                    } else {
+                        html += `<div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">` + params[key]["description"] + `</label>
+                                    <input type="text" name="` + key + `" class="form-control"
+                                           placeholder="` + params[key]["placeholder"] + `"
+                                           value="">
+                                </div>
+                            </div>
+                        </div>`
+                        t += 1;
+                    }
+                }
+                if (t % 2 === 1) {
+                    html += '</div>';
+                }
+            }
+            $("#image-host-container").html(html);
+        }
+
+        let image_type_container = "<option>关闭</option>";
+        for (let key in all_image_hosts) {
+            if (now_image_host["type"] === key) {
+                image_type_container += `<option selected>` + key + `</option>`;
+                change_image_host(key);
+            } else {
+                image_type_container += `<option>` + key + `</option>`;
+            }
+        }
+        if (!now_image_host["type"]) {
+            change_image_host("关闭");
+        }
+        $("#image-type").html(image_type_container);
+
+    </script>
+{% endblock javascripts %}

@@ -1,0 +1,135 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} 编辑配置: {{ filename }} {% endblock title %}
+
+{% block content %}
+
+    <div class="header bg-primary pb-6">
+        <div class="container-fluid">
+            <div class="header-body">
+                <div class="row align-items-center py-4">
+                    <div class="col-lg-6 col-7">
+                        <h6 class="h2 text-white d-inline-block mb-0">正在编辑: {{ filepath }}</h6>
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                            <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="/configs.html">配置</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">编辑</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="col-lg-6 col-5 text-right">
+                        <a href="/configs.html" class="btn btn-sm btn-neutral">配置列表</a>
+                        <a href="javascript:SaveChanges()" class="btn btn-sm btn-neutral">保存</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div id="editor" class="ace_editor" style="height: 36rem;
+                    min-height:inherit;border-radius: 0.375rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        {% include "includes/footer.html" %}
+
+    </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+
+
+    <script src="{{ cdnjs }}ace/1.15.0/ace.js"></script>
+    <script src="{{ cdnjs }}ace/1.15.0/ext-language_tools.js"></script>
+    <script src="{{ cdnjs }}ace/1.15.0/ext-modelist.js"></script>
+    <script>
+        var _status = true;
+        var file_content = {{ file_content|safe }};
+
+        editor = ace.edit("editor");
+        editor.setTheme("ace/theme/tomorrow");
+
+        let modelist = ace.require("ace/ext/modelist");
+        let filePath = "blahblah/weee/some.js";
+        let mode = modelist.getModeForPath("{{ filename }}").mode;
+        editor.session.setMode(mode);
+
+        editor.setFontSize(15);	//字体大小
+        document.getElementById("editor").style.lineHeight = "25px";
+        editor.setReadOnly(false);
+        editor.setOption("wrap", "free");
+        ace.require("ace/ext/language_tools");
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
+        editor.setHighlightActiveLine(true);
+        editor.setShowPrintMargin(false);
+        editor.getSession().setUseWorker(false);
+        editor.getSession().setUseWrapMode(true);
+        editor.getSession().setUseSoftTabs(true);
+        editor.session.setValue(file_content);
+        $.ajaxSetup({
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+        });
+
+
+        function SaveChanges() {
+            if (!_status) {
+                return false;
+            }
+            var loading = new KZ_Loading('正在保存中...');
+            _status = false;
+            loading.show();
+            $.ajax({
+                url: '/api/save/',
+                method: 'post',
+                data: {"file": "{{ filepath }}", "content": editor.getValue()},
+                dataType: 'JSON',
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                        file_content = editor.getValue();
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                    _status = true;
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                    _status = true;
+                }
+            })
+        }
+
+        document.onkeydown = function () {
+            // 判断 Ctrl+S
+            if (event.ctrlKey === true && event.keyCode === 83) {
+                SaveChanges();
+                event.preventDefault();
+            }
+        }
+
+        window.onbeforeunload = function (e) {
+            e = e || window.event;
+            if (e && file_content !== editor.getValue()) {
+                e.returnValue = '确定要离开吗?';
+                return '确定要离开吗?';
+            }
+        }
+
+    </script>
+{% endblock javascripts %}

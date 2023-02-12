@@ -1,0 +1,84 @@
+<!--
+=========================================================
+* Argon Dashboard - v1.2.0
+=========================================================
+* Product Page: https://www.creative-tim.com/product/argon-dashboard
+
+
+* Copyright  Creative Tim (http://www.creative-tim.com)
+* Coded by www.creative-tim.com
+
+
+
+=========================================================
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="canonical" href="https://github.com/Qexo/Qexo">
+
+    <title>
+        {{ QEXO_NAME }}{{ QEXO_SPLIT }}{% block title %}{% endblock %}
+    </title>
+
+    <!-- Favicon - loaded as static -->
+    <link rel="shortcut icon" href="{{ QEXO_ICON }}">
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+    <!-- Icons -->
+    <link rel="stylesheet"
+          href="{{ cdnjs }}argon-dashboard-react/1.2.0/assets/plugins/nucleo/css/nucleo.css"
+          type="text/css">
+    <link rel="stylesheet"
+          href="{{ cdnjs }}font-awesome/6.1.1/css/all.min.css"
+          type="text/css">
+    <link rel="stylesheet"
+          href="{{ cdnjs }}notyf/3.5.1/notyf.min.css"
+          type="text/css">
+    <!-- Page plugins -->
+    <!-- Argon CSS -->
+    <link rel="stylesheet"
+          href="{{ cdnjs }}argon-dashboard-django/1.0.2/css/argon.min.css"
+          type="text/css">
+    <!-- Specific CSS goes HERE -->
+    {% block stylesheets %}
+        <style>
+            .notyf__toast {
+                max-width: 24em !important;
+            }
+
+            .notyf__ripple {
+                height: 60em !important;
+                width: 60em !important;
+            }
+        </style>
+    {% endblock stylesheets %}
+</head>
+
+<body class="">
+
+{% include "includes/sidenav.html" %}
+
+<div class="main-content" id="panel">
+
+    {% include "includes/navigation.html" %}
+
+    {% block content %}{% endblock content %}
+
+</div>
+
+{% include "includes/scripts.html" %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+{% endblock javascripts %}
+
+<script src="{{ cdnjs }}argon-dashboard-django/1.0.2/js/argon.min.js"></script>
+
+</body>
+
+</html>
