@@ -64,3 +64,12 @@ class TalkModel(models.Model):
     time = models.TextField(max_length=0x7FFFFFFF)
     like = models.TextField(max_length=0x7FFFFFFF, blank=True, default="[]")
     values = models.TextField(max_length=0x7FFFFFFF, default="{}")
+
+
+class EssayModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    content = models.TextField(max_length=0x7FFFFFFF, blank=True)
+    tags = models.TextField(max_length=0x7FFFFFFF, blank=True)
+    time = models.TextField(max_length=0x7FFFFFFF)
+    like = models.TextField(max_length=0x7FFFFFFF, blank=True, default="[]")
+    values = models.TextField(max_length=0x7FFFFFFF, default="{}")
