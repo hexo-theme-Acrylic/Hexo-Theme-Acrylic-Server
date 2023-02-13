@@ -92,6 +92,7 @@ urlpatterns = [
     path('pub/like_talk/', pub.like_talk, name='pub_like_talk'),
     path('pub/save_talk/', pub.save_talk, name='pub_save_talk'),
     path('pub/del_talk/', pub.del_talk, name='pub_del_talk'),
+    path('pub/essay/', pub.get_essay, name='pub_essay'),
 
     re_path(r'^(?!api)^(?!pub).*$\.*', pages, name='pages'),
 ]
