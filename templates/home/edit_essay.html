@@ -14,7 +14,7 @@
                             <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                                 <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a>
                                 </li>
-                                <li class="breadcrumb-item"><a href="/talks.html">即刻短文</a></li>
+                                <li class="breadcrumb-item"><a href="/essay.html">即刻短文</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">编辑</li>
                             </ol>
                         </nav>
@@ -610,7 +610,7 @@
                     loading.destroy();
                     if (res.status) {
                         notyf.success('删除成功！');
-                        window.location.href = "/talks.html";
+                        window.location.href = "/essay.html";
                     } else {
                         notyf.error(res.msg);
                     }
