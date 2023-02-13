@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .functions import *
-from .models import ImageModel
+from .models import EssayModel, ImageModel
 
 
 # 保存内容 pub/save
@@ -555,6 +555,39 @@ def notifications(request):
         logging.error(repr(error))
         context = {"msg": repr(error), "status": False}
         return JsonResponse(safe=False, data=context)
+
+
+# 获取说说 pub/talks
+@csrf_exempt
+def get_essay(request):
+    try:
+        page = int(request.GET.get('page')) if request.GET.get('page') else 1
+        limit = int(request.GET.get('limit')) if request.GET.get('limit') else 5
+        ip = request.META['HTTP_X_FORWARDED_FOR'] if 'HTTP_X_FORWARDED_FOR' in request.META.keys() else request.META[
+            'REMOTE_ADDR']  # 使用用户IP判断点赞是否成立
+        if not page:
+            page = 1
+        if not limit:
+            limit = 10
+        all_talks = EssayModel.objects.all()
+        count = all_talks.count()
+        all_talks = all_talks.order_by("time")[::-1][(page - 1) * limit:page * limit]
+        talks = []
+        for i in all_talks:
+            t = json.loads(i.like)
+            try:
+                values = json.loads(i.values)
+            except Exception:
+                i.values = "{}"
+                values = {}
+                i.save()
+            talks.append({"id": i.id.hex, "content": i.content, "time": i.time, "tags": json.loads(i.tags), "like": len(t) if t else 0,
+                          "liked": True if ip in t else False, "values": values})
+        context = {"msg": "获取成功！", "status": True, "count": count, "data": talks}
+    except Exception as error:
+        logging.error(repr(error))
+        context = {"msg": repr(error), "status": False}
+    return JsonResponse(safe=False, data=context)
 
 
 # 获取说说 pub/talks

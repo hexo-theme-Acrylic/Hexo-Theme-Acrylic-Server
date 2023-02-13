@@ -1,6 +1,6 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} {% if search %}搜索说说: {{ search }}{% else %}全部说说{% endif %}{% endblock title %}
+{% block title %} {% if search %}搜索即刻短文: {{ search }}{% else %}全部即刻短文{% endif %}{% endblock title %}
 
 {% block content %}
 
@@ -9,18 +9,18 @@
             <div class="header-body">
                 <div class="row align-items-center py-4">
                     <div class="col-lg-6 col-7">
-                        <h6 class="h2 text-white d-inline-block mb-0">说说列表</h6>
+                        <h6 class="h2 text-white d-inline-block mb-0">即刻短文列表</h6>
                         <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
                             <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                                 <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a>
                                 </li>
-                                <li class="breadcrumb-item active" aria-current="page">说说</li>
+                                <li class="breadcrumb-item active" aria-current="page">即刻短文</li>
                             </ol>
                         </nav>
                     </div>
                     <div class="col-lg-6 col-5 text-right">
                         <a href="/" class="btn btn-sm btn-neutral">主页</a>
-                        <a href="/edit_talk.html" class="btn btn-sm btn-neutral">新建说说</a>
+                        <a href="/edit_talk.html" class="btn btn-sm btn-neutral">新建即刻短文</a>
                     </div>
                 </div>
             </div>
@@ -35,8 +35,8 @@
                     <div class="card-header border-0">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h3 class="mb-0">{% if search %}搜索说说: {{ search }}{% else %}
-                                    全部说说{% endif %}
+                                <h3 class="mb-0">{% if search %}搜索即刻短文: {{ search }}{% else %}
+                                    全部即刻短文{% endif %}
                                     (<span id="post-number">{{ post_number }}</span>条)</h3>
                             </div>
                         </div>
