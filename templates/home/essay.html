@@ -20,7 +20,7 @@
                     </div>
                     <div class="col-lg-6 col-5 text-right">
                         <a href="/" class="btn btn-sm btn-neutral">主页</a>
-                        <a href="/edit_talk.html" class="btn btn-sm btn-neutral">新建即刻短文</a>
+                        <a href="/edit_essay.html" class="btn btn-sm btn-neutral">新建即刻短文</a>
                     </div>
                 </div>
             </div>
@@ -149,7 +149,7 @@
             for (let i = 0; i < page_posts.length; i++) {
                 list += "<tr><th scope=\"row\">" + page_posts[i]["content"] +
                     "</th><td>" + page_posts[i]["time"] + "</td><td>" + page_posts[i]["tags"]
-                    + "</td><td>" + page_posts[i]["like"] + "</td><td> <a href=\"/edit_talk" +
+                    + "</td><td>" + page_posts[i]["like"] + "</td><td> <a href=\"/edit_essay" +
                     ".html?id=" + page_posts[i]["id"] + "\"><i class=\"fa fa-edit mr-2\"></i></a>|&nbsp;&nbsp;" +
                     " <a href=\"javascript:query_delete('" + page_posts[i]["id"] + "')\"><i " +
                     "class=\"fa fa-trash-alt mr-2\"></i></a></td></tr>";

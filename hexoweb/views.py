@@ -4,6 +4,8 @@ from django.contrib.auth import logout
 from django import template
 from django.http import HttpResponse
 from django.template import loader
+
+from hexoweb.models import EssayModel
 from .api import *
 from math import ceil
 
@@ -425,6 +427,23 @@ def pages(request):
                 context["tags"] = Talk.tags
                 context["id"] = talk_id
                 context["values"] = Talk.values
+            try:
+                if json.loads(get_setting("IMG_HOST"))["type"] != "关闭":
+                    context["img_bed"] = True
+            except Exception:
+                logging.info("未检测到图床配置, 图床功能关闭")
+        elif "edit_essay" in load_template:
+            essay_id = request.GET.get("id")
+            context["content"] = repr("")
+            context["tags"] = "[]"
+            context["values"] = "{}"
+            context["sidebar"] = get_setting("Essay_SIDEBAR")
+            if essay_id:
+                Essay = EssayModel.objects.get(id=uuid.UUID(hex=essay_id))
+                context["content"] = repr(Essay.content)
+                context["tags"] = Essay.tags
+                context["id"] = essay_id
+                context["values"] = Essay.values
             try:
                 if json.loads(get_setting("IMG_HOST"))["type"] != "关闭":
                     context["img_bed"] = True
