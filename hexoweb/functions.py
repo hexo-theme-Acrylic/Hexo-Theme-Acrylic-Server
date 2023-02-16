@@ -313,7 +313,8 @@ def get_latest_version():
 
 
 def check_if_api_auth(request):
-    print("request.body:", request.body)
+    print("json.loads(request.body):", json.loads(request.body))
+    print("json.loads(request.body).token:", json.loads(request.body).token)
     print("request.POST:", request.POST)
     print("request token:", request.POST.get("token"))
     print("get_setting() token:", get_setting("WEBHOOK_APIKEY"))
