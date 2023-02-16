@@ -19,6 +19,7 @@ urlpatterns = [
     path("update/", update_view, name="update"),
     path('migrate/', migrate_view, name="migrate"),
     path('', index, name='home'),
+    path('send_email/', send_email, name="send_email"),
 
     path('api/auth/', auth, name='auth'),
     path('api/save/', save, name='save'),
@@ -93,6 +94,7 @@ urlpatterns = [
     path('pub/save_talk/', pub.save_talk, name='pub_save_talk'),
     path('pub/del_talk/', pub.del_talk, name='pub_del_talk'),
     path('pub/essay/', pub.get_essay, name='pub_essay'),
+    path('pub/subscribe/', pub.subscribe, name='pub_subscribe'),
 
     re_path(r'^(?!api)^(?!pub).*$\.*', pages, name='pages'),
 ]

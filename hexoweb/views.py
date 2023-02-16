@@ -1,13 +1,16 @@
 # -*- encoding: utf-8 -*-
+from django.core.mail import EmailMessage
 from django.shortcuts import redirect, render
 from django.contrib.auth import logout
 from django import template
 from django.http import HttpResponse
 from django.template import loader
+from core import settings
 
 from hexoweb.models import EssayModel
 from .api import *
 from math import ceil
+from django.core.mail import send_mail
 
 
 def page_404(request, exception):
@@ -794,3 +797,13 @@ def pages(request):
         html_template = loader.get_template('home/page-500.html')
         context["error"] = error
         return HttpResponse(html_template.render(context, request))
+
+def send_email(request):
+    for to_email in ['1114686212@qq.com', '1045301114@qq.com']:
+        subject, from_email = 'hello', settings.EMAIL_HOST_USER
+        html_content = getSubscribeHtml()
+        print(to_email)
+        msg = EmailMessage(subject, html_content, from_email, [to_email])
+        msg.content_subtype = 'html'
+        msg.send()
+    return HttpResponse('OK,邮件已经发送成功!')
