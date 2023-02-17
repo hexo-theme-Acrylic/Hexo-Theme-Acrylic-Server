@@ -696,16 +696,12 @@ def del_talk(request):
 @csrf_exempt
 def subscribe(request):
     try:
-        if not check_if_api_auth(request):
-            return JsonResponse(safe=False, data={"msg": "鉴权错误！", "status": False})
-        if not request.POST.get("mail") or not request.POST.get("mail"):
-            return JsonResponse(safe=False, data={"msg": "邮箱或名称没填！", "status": False})
-        if MailModel.objects.get(mail=request.POST.get("mail")):
-            context = {"msg": "订阅成功", "status": True}
-        else:
-            mail = MailModel(mail=request.POST.get("mail"), name=request.POST.get("name"))
-            mail.save()
-            context = {"msg": "订阅成功", "status": True}
+        rev_mail = json.loads(request.body).get('mail')
+        rev_name = json.loads(request.body).get('name')
+        subscriber = MailModel.objects.filter(mail=rev_mail, name=rev_name).first()
+        if not subscriber:
+            MailModel.objects.create(mail=rev_mail, name=rev_name)
+        context = {"msg": "订阅成功", "status": True}
     except Exception as error:
         logging.error(repr(error))
         context = {"msg": repr(error), "status": False}
