@@ -134,6 +134,31 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card card-stats">
+                            <!-- Card body -->
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5 class="card-title text-uppercase text-muted mb-0">
+                                            邮箱订阅</h5>
+                                        <span class="h2 font-weight-bold mb-0">订阅总数：{{ sub_sum }}</span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                                            <a class="ni-ni-chart-bar-32" href="javascript:subscribe();" role="button">
+                                                <i class="ni ni-chart-bar-32"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="mt-3 mb-0 text-sm">
+                                    <span class="text mr-2"><i class="fab fa-github-alt"></i></span>
+                                    <span class="text-nowrap">发送订阅邮件通知</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -240,4 +265,28 @@
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
+    <script>
+        function subscribe() {
+            let loading = new KZ_Loading("正在发送订阅邮件中");
+            loading.show();
+            $.ajax({
+                url: '/api/send_email/',
+                method: 'get',
+                dataType: 'json',
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                        setTimeout(location.reload(), 1000);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+    </script>
 {% endblock javascripts %}
