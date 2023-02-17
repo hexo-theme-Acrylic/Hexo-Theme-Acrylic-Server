@@ -1,11 +1,14 @@
 import random
+import django
 
+from django.core.mail import EmailMessage
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from core import settings
 from .functions import *
 
 
@@ -924,3 +927,15 @@ def run_online_script(request):
         logging.error(repr(error))
         context = {"msg": repr(error), "status": False}
     return JsonResponse(safe=False, data=context)
+
+# 发送订阅邮件
+@login_required(login_url="/login/")
+def send_email(request):
+    for to_email in MailModel.objects.all():
+        subject, from_email = 'Shine的博客订阅通知', settings.EMAIL_HOST_USER
+        html_content = getSubscribeHtml()
+        print(to_email)
+        msg = django.core.mail.EmailMessage(subject, html_content, from_email, [to_email.mail])
+        msg.content_subtype = 'html'
+        msg.send()
+    return JsonResponse(safe=False, data={"msg":"OK，邮件已经发送完成。", "status":"true"})

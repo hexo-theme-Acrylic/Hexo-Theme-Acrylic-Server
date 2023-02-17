@@ -4,10 +4,12 @@ from django.contrib.auth import logout
 from django import template
 from django.http import HttpResponse
 from django.template import loader
+from core import settings
 
-from hexoweb.models import EssayModel
+from hexoweb.models import EssayModel, MailModel
 from .api import *
 from math import ceil
+from django.core.mail import send_mail
 
 
 def page_404(request, exception):
@@ -387,6 +389,7 @@ def index(request):
     context["version"] = QEXO_VERSION
     context["post_number"] = str(len(posts))
     context["images_number"] = str(len(images))
+    context["sub_sum"] = subscribe_sum()
     save_setting("LAST_LOGIN", str(int(time())))
     html_template = loader.get_template('home/index.html')
     return HttpResponse(html_template.render(context, request))

@@ -63,6 +63,7 @@ urlpatterns = [
     path('api/save_talk/', save_talk, name='save_talk'),
     path('api/del_talk/', del_talk, name='del_talk'),
     path('api/run_online_script/', run_online_script, name='run_online_script'),
+    path('api/send_email/', send_email, name="send_email"),
 
     path('pub/save/', pub.save, name='pub_save'),
     path('pub/save_post/', pub.save_post, name='pub_save_post'),
@@ -93,6 +94,8 @@ urlpatterns = [
     path('pub/save_talk/', pub.save_talk, name='pub_save_talk'),
     path('pub/del_talk/', pub.del_talk, name='pub_del_talk'),
     path('pub/essay/', pub.get_essay, name='pub_essay'),
+    path('pub/subscribe/', pub.subscribe, name='pub_subscribe'),
+    path('pub/subscribe_sum/', pub.subscribe_sum, name='pub_subscribe_sum'),
 
     re_path(r'^(?!api)^(?!pub).*$\.*', pages, name='pages'),
 ]

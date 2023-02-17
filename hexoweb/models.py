@@ -73,3 +73,7 @@ class EssayModel(models.Model):
     time = models.TextField(max_length=0x7FFFFFFF)
     like = models.TextField(max_length=0x7FFFFFFF, blank=True, default="[]")
     values = models.TextField(max_length=0x7FFFFFFF, default="{}")
+
+class MailModel(models.Model):
+    mail=models.CharField(primary_key=True, max_length=50, verbose_name='邮箱')
+    name=models.CharField(max_length=30, unique=True, verbose_name='名称')

@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .functions import *
-from .models import EssayModel, ImageModel
+from .models import EssayModel, ImageModel, MailModel
 
 
 # 保存内容 pub/save
@@ -687,6 +687,21 @@ def del_talk(request):
             return JsonResponse(safe=False, data={"msg": "鉴权错误！", "status": False})
         TalkModel.objects.get(id=uuid.UUID(hex=request.POST.get("id"))).delete()
         context = {"msg": "删除成功！", "status": True}
+    except Exception as error:
+        logging.error(repr(error))
+        context = {"msg": repr(error), "status": False}
+    return JsonResponse(safe=False, data=context)
+
+# 提交订阅邮箱 pub/subscribe
+@csrf_exempt
+def subscribe(request):
+    try:
+        rev_mail = json.loads(request.body).get('mail')
+        rev_name = json.loads(request.body).get('name')
+        subscriber = MailModel.objects.filter(mail=rev_mail, name=rev_name).first()
+        if not subscriber:
+            MailModel.objects.create(mail=rev_mail, name=rev_name)
+        context = {"msg": "订阅成功", "status": True}
     except Exception as error:
         logging.error(repr(error))
         context = {"msg": repr(error), "status": False}

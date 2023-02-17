@@ -191,3 +191,13 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SESSION_COOKIE_AGE = 86400
+
+# 固定写法设置Email引擎
+EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend' 
+EMAIL_HOST = 'smtp.qq.com' # 腾讯QQ邮箱 SMTP 服务器地址 
+# EMAIL_PORT = 25 # SMTP服务的端口号 
+EMAIL_PORT = 465 # SMTP服务的端口号 
+EMAIL_HOST_USER = 'shine.yull@foxmail.com' #你的qq邮箱，邮件发送者的邮箱 
+EMAIL_HOST_PASSWORD = 'nyogvnbzaifwbebb' #你申请的授权码（略） 
+# EMAIL_USE_TLS = False #与SMTP服务器通信时,是否启用安全模式
+EMAIL_USE_SSL = True
