@@ -934,7 +934,8 @@ def send_email(request):
     for to_email in MailModel.objects.all():
         subject, from_email = 'Shine的博客订阅通知', settings.EMAIL_HOST_USER
         html_content = getSubscribeHtml()
-        print(to_email)
+        print("to_email.mail:", to_email.mail)
+        print("to_email.name:", to_email.name)
         msg = django.core.mail.EmailMessage(subject, html_content, from_email, [to_email.mail])
         msg.content_subtype = 'html'
         msg.send()
