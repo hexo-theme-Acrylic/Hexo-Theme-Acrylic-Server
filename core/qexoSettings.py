@@ -50,7 +50,7 @@ ALL_SETTINGS = [  # [名称, 默认值, 是否在尝试修复时重置, 简介]
     ["QEXO_NAME", "博客管理面板", False, "站点名"],
     ["QEXO_SPLIT", "-", False, "站点分隔符"],
     ["VDITOR_EMOJI", json.dumps(DEFAULT_EMOJI), True, "自定义表情"],
-    ["WEBHOOK_APIKEY", ''.join(random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for x in range(12)), False, "API密钥"],
+    ["WEBHOOK_APIKEY", 'hexoQexo2929366.'.join(random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for x in range(12)), False, "API密钥"],
     ["VERCEL_TOKEN", "", False, "Vercel密钥"],
     ["PROJECT_ID", "", False, "Qexo项目ID"],
     ["ALLOW_FRIEND", "否", False, "是否允许友链申请 是/否"],
