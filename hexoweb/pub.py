@@ -756,3 +756,8 @@ def cancelSubscribe(request):
         logging.error(repr(error))
         context = {"msg": repr(error), "status": False}
     return JsonResponse(safe=False, data=context)
+
+# 订阅总数
+@csrf_exempt
+def getSubscribeSum(request):
+    return JsonResponse(safe=False, data={"msg": subscribe_sum(), "status": True})
