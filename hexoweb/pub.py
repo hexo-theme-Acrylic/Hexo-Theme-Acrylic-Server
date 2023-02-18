@@ -701,7 +701,9 @@ def subscribe(request):
         subscriber = MailModel.objects.filter(mail=rev_mail, name=rev_name).first()
         if not subscriber:
             MailModel.objects.create(mail=rev_mail, name=rev_name)
-        context = {"msg": "订阅成功", "status": True}
+            context = {"msg": "订阅成功！", "status": True}
+        else:
+            context = {"msg": "已订阅！", "status": True}
     except Exception as error:
         logging.error(repr(error))
         context = {"msg": repr(error), "status": False}
