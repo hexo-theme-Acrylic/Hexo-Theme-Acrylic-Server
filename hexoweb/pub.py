@@ -698,6 +698,9 @@ def del_talk(request):
 # 提交订阅邮箱 pub/subscribe
 @csrf_exempt
 def subscribe(request):
+    if request.method != "POST":
+        return
+
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
@@ -724,6 +727,9 @@ def subscribe(request):
 # 提交取消订阅邮箱 pub/subscribe
 @csrf_exempt
 def cancelSubscribe(request):
+    if request.method != "POST":
+        return
+
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
