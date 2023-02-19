@@ -146,7 +146,7 @@
                                     </div>
                                     <div class="col-auto">
                                         <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
-                                            <a class="ni-ni-chart-bar-32" href="javascript:subscribe();" role="button">
+                                            <a class="ni-ni-chart-bar-32" href="javascript:query_sendemail();" role="button">
                                                 <i class="ni ni-chart-bar-32"></i>
                                             </a>
                                         </div>
@@ -257,6 +257,30 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="querySendEmail" tabindex="-1" aria-labelledby="querySendEmailLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="querySendEmailLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        确定要发送订阅邮件吗？这会使用你设置的邮箱账号给所有订阅了的读者发送邮件哦！
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="subscribe()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {% include "includes/footer.html" %}
 
     </div>
@@ -287,6 +311,9 @@
                     notyf.error("网络错误！");
                 }
             })
+        }
+        function query_sendemail() {
+            $("#querySendEmail").modal("show");
         }
     </script>
 {% endblock javascripts %}

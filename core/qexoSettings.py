@@ -77,4 +77,6 @@ ALL_SETTINGS = [  # [名称, 默认值, 是否在尝试修复时重置, 简介]
     ["ALL_UPDATES", json.dumps(DEFAULT_UPDATES), True, "更新源列表"],
     ["UPDATE_FROM", "false", False, "是否更新过"],
     ["JUMP_UPDATE", "false", False, "是否转跳到更新界面"],
+    ["EMAIL_HOST_PASSWORD", "", False, "QQ邮箱授权码"],
+    ["EMAIL_HOST_USER", "", False, "QQ邮箱号"],
 ]

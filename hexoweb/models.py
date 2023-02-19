@@ -76,8 +76,8 @@ class EssayModel(models.Model):
 
 class MailModel(models.Model):
     mail=models.CharField(primary_key=True, max_length=50, verbose_name='邮箱')
-<<<<<<< HEAD
-    name=models.CharField(max_length=30, unique=True, verbose_name='名称')
-=======
-    name=models.CharField(max_length=30, unique=True, verbose_name='名称')
->>>>>>> deploy-localhost
+    name=models.CharField(unique=False, max_length=30, verbose_name='名称')
+
+class CancelMailModel(models.Model):
+    mail=models.CharField(primary_key=True, max_length=50, verbose_name='邮箱')
+    name=models.CharField(unique=False, max_length=30, verbose_name='名称')

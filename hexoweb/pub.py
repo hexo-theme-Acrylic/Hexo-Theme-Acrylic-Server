@@ -1,11 +1,14 @@
 import random
+import django
 
 from django.http.response import HttpResponseForbidden
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from core import settings
+
 from .functions import *
-from .models import EssayModel, ImageModel, MailModel
+from .models import CancelMailModel, EssayModel, ImageModel, MailModel
 
 
 # 保存内容 pub/save
@@ -695,14 +698,66 @@ def del_talk(request):
 # 提交订阅邮箱 pub/subscribe
 @csrf_exempt
 def subscribe(request):
+    if request.method != "POST":
+        return
+
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
-        subscriber = MailModel.objects.filter(mail=rev_mail, name=rev_name).first()
+        subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         if not subscriber:
-            MailModel.objects.create(mail=rev_mail, name=rev_name)
-        context = {"msg": "订阅成功", "status": True}
+            try:
+                # 验证邮箱是否是有效可用的
+                subject, from_email = 'Shine的博客订阅验证', settings.EMAIL_HOST_USER
+                html_content = getSubscribeSuccessHtml()
+                msg = django.core.mail.EmailMessage(subject, html_content, from_email, [rev_mail])
+                msg.content_subtype = 'html'
+                msg.send()
+                MailModel.objects.create(mail=rev_mail, name=rev_name)  # 注册订阅邮箱
+                context = {"msg": "订阅成功邮件已发送至您的邮箱，请查收！", "status": True}
+            except Exception as error:
+                context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
+        else:
+            context = {"msg": "已订阅！", "status": True}
     except Exception as error:
         logging.error(repr(error))
         context = {"msg": repr(error), "status": False}
     return JsonResponse(safe=False, data=context)
+
+# 提交取消订阅邮箱 pub/subscribe
+@csrf_exempt
+def cancelSubscribe(request):
+    if request.method != "POST":
+        return
+
+    try:
+        rev_mail = json.loads(request.body).get('mail')
+        rev_name = json.loads(request.body).get('name')
+        subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
+        cancelSubscriber = CancelMailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经取消订阅过
+        if subscriber:
+            if cancelSubscriber:
+                context = {"msg": "已经提交您的请求，请及时回复邮件。", "status": True}
+            else:
+                try:
+                    # 验证邮箱是否是有效可用的
+                    subject, from_email = 'Shine博客的取消订阅验证', settings.EMAIL_HOST_USER
+                    html_content = getCancelSubscribeHtml()
+                    msg = django.core.mail.EmailMessage(subject, html_content, from_email, [rev_mail])
+                    msg.content_subtype = 'html'
+                    msg.send()
+                    CancelMailModel.objects.create(mail=rev_mail, name=rev_name)  # 记录取消订阅的邮箱
+                    context = {"msg": "请查看邮箱，回复邮件即可取消对博客的订阅了。", "status": True}
+                except Exception as error:
+                    context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
+        else:
+            context = {"msg": "查询不到您的订阅邮箱！", "status": True}
+    except Exception as error:
+        logging.error(repr(error))
+        context = {"msg": repr(error), "status": False}
+    return JsonResponse(safe=False, data=context)
+
+# 订阅总数
+@csrf_exempt
+def getSubscribeSum(request):
+    return JsonResponse(safe=False, data={"msg": subscribe_sum(), "status": True})
