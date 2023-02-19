@@ -1,7 +1,7 @@
 import random
 import django
 
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, get_connection
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -931,11 +931,22 @@ def run_online_script(request):
 # 发送订阅邮件
 @login_required(login_url="/login/")
 def send_email(request):
+    from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+    email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
+    subject = 'Shine的博客订阅通知'
+    html_content = getSubscribeHtml()
     for to_email in MailModel.objects.all():
-        subject, from_email = 'Shine的博客订阅通知', settings.EMAIL_HOST_USER
-        html_content = getSubscribeHtml()
-        print(to_email)
-        msg = django.core.mail.EmailMessage(subject, html_content, from_email, [to_email.mail])
+        msg = django.core.mail.EmailMessage(
+            subject,
+            html_content,
+            from_email,
+            [to_email.mail],
+            connection=get_connection(
+                username=from_email,
+                password=email_passd,
+                fail_silently=False
+            )
+        )
         msg.content_subtype = 'html'
         msg.send()
     return JsonResponse(safe=False, data={"msg":"OK，邮件已经发送完成。", "status":"true"})
