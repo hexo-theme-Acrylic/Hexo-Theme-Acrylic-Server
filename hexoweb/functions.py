@@ -3,6 +3,9 @@ import sys
 from io import StringIO
 import subprocess
 import unicodedata
+
+import django
+from django.core.mail import get_connection
 from core.qexoSettings import ALL_SETTINGS
 import requests
 from django.template.defaulttags import register
@@ -950,6 +953,25 @@ def subscribe_sum():
     except Exception as error:
         logging.error(repr(error))
     return 0
+
+# 发送邮件
+def send_custom_email(rev_mail, rev_name, content, content_subtype):
+    from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+    email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
+    subject = 'Shine的博客订阅验证'
+    msg = django.core.mail.EmailMessage(
+        subject, 
+        content, 
+        from_email, 
+        [rev_mail],
+        connection=get_connection(
+            username=from_email,
+            password=email_passd,
+            fail_silently=False
+        )
+    )
+    msg.content_subtype = content_subtype
+    msg.send()
 
 # print(" ......................阿弥陀佛......................\n" +
 #       "                       _oo0oo_                      \n" +
