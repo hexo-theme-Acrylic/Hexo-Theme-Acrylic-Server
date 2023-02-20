@@ -733,6 +733,8 @@ def cancelSubscribe(request):
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
+        from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").
         subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         cancelSubscriber = CancelMailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经取消订阅过
         if subscriber:
@@ -741,9 +743,19 @@ def cancelSubscribe(request):
             else:
                 try:
                     # 验证邮箱是否是有效可用的
-                    subject, from_email = 'Shine博客的取消订阅验证', settings.EMAIL_HOST_USER
+                    subject = 'Shine博客的取消订阅验证'
                     html_content = getCancelSubscribeHtml()
-                    msg = django.core.mail.EmailMessage(subject, html_content, from_email, [rev_mail])
+                    msg = django.core.mail.EmailMessage(
+                        subject, 
+                        html_content, 
+                        from_email, 
+                        [rev_mail],
+                        connection=get_connection(
+                            username=from_email,
+                            password=email_passd,
+                            fail_silently=False
+                        )
+                    )
                     msg.content_subtype = 'html'
                     msg.send()
                     CancelMailModel.objects.create(mail=rev_mail, name=rev_name)  # 记录取消订阅的邮箱
