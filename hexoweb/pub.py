@@ -705,27 +705,11 @@ def subscribe(request):
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
-        from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
-        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
         subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         if not subscriber:
             try:
                 # 验证邮箱是否是有效可用的
-                subject = 'Shine的博客订阅验证'
-                html_content = getSubscribeSuccessHtml()
-                msg = django.core.mail.EmailMessage(
-                    subject, 
-                    html_content, 
-                    from_email, 
-                    [rev_mail],
-                    connection=get_connection(
-                        username=from_email,
-                        password=email_passd,
-                        fail_silently=False
-                    )
-                )
-                msg.content_subtype = 'html'
-                msg.send()
+                send_custom_email(rev_mail, rev_name, getSubscribeSuccessHtml(), 'html')
                 MailModel.objects.create(mail=rev_mail, name=rev_name)  # 注册订阅邮箱
                 context = {"msg": "订阅成功邮件已发送至您的邮箱，请查收！", "status": True}
             except Exception as error:
@@ -746,8 +730,6 @@ def cancelSubscribe(request):
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
-        from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
-        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
         subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         cancelSubscriber = CancelMailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经取消订阅过
         if subscriber:
@@ -756,21 +738,7 @@ def cancelSubscribe(request):
             else:
                 try:
                     # 验证邮箱是否是有效可用的
-                    subject = 'Shine博客的取消订阅验证'
-                    html_content = getCancelSubscribeHtml()
-                    msg = django.core.mail.EmailMessage(
-                        subject, 
-                        html_content, 
-                        from_email, 
-                        [rev_mail],
-                        connection=get_connection(
-                            username=from_email,
-                            password=email_passd,
-                            fail_silently=False
-                        )
-                    )
-                    msg.content_subtype = 'html'
-                    msg.send()
+                    send_custom_email(rev_mail, rev_name, getCancelSubscribeHtml(), 'html')
                     CancelMailModel.objects.create(mail=rev_mail, name=rev_name)  # 记录取消订阅的邮箱
                     context = {"msg": "请查看邮箱，回复邮件即可取消对博客的订阅了。", "status": True}
                 except Exception as error:
