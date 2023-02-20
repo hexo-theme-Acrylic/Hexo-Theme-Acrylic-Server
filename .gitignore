@@ -3,6 +3,7 @@
 .idea
 tmp
 venv
-hexoweb/migrations
+hexoweb/migrations/__pycache__
+hexoweb/migrations/*.py
+!hexoweb/migrations/__init__.py
 staticfiles_build
-./configs.py
