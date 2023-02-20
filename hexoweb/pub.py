@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from core import settings
 
 from .functions import *
-from .models import CancelMailModel, EssayModel, ImageModel, MailModel
+from .models import CancelMailModel, EssayModel, ImageModel, MailModel, SettingModel
 
 
 # 保存内容 pub/save
