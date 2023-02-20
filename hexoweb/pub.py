@@ -734,7 +734,7 @@ def cancelSubscribe(request):
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
         from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
-        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").
+        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
         subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         cancelSubscriber = CancelMailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经取消订阅过
         if subscriber:
