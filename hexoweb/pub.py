@@ -1,6 +1,7 @@
 import random
 import django
 
+from django.core.mail import get_connection
 from django.http.response import HttpResponseForbidden
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
