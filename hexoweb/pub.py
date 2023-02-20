@@ -705,15 +705,20 @@ def subscribe(request):
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
+        from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
         subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         if not subscriber:
+            register_succ = False
             try:
-                # 验证邮箱是否是有效可用的
-                send_custom_email(rev_mail, rev_name, getSubscribeSuccessHtml(), 'html')
+                send_custom_email(rev_mail, rev_name, from_email, email_passd, getSubscribeSuccessHtml(), 'html')  # 验证邮箱是否是有效可用的
                 MailModel.objects.create(mail=rev_mail, name=rev_name)  # 注册订阅邮箱
+                register_succ = True
                 context = {"msg": "订阅成功邮件已发送至您的邮箱，请查收！", "status": True}
             except Exception as error:
                 context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
+            if register_succ:
+                send_custom_email(from_email, None, from_email, email_passd, getNewSubscribeTipsHtml(), 'html')  # 通知博主
         else:
             context = {"msg": "已订阅！", "status": True}
     except Exception as error:
@@ -730,6 +735,8 @@ def cancelSubscribe(request):
     try:
         rev_mail = json.loads(request.body).get('mail')
         rev_name = json.loads(request.body).get('name')
+        from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
         subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         cancelSubscriber = CancelMailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经取消订阅过
         if subscriber:
@@ -738,7 +745,7 @@ def cancelSubscribe(request):
             else:
                 try:
                     # 验证邮箱是否是有效可用的
-                    send_custom_email(rev_mail, rev_name, getCancelSubscribeHtml(), 'html')
+                    send_custom_email(rev_mail, rev_name, from_email, email_passd, getCancelSubscribeHtml(), 'html')
                     CancelMailModel.objects.create(mail=rev_mail, name=rev_name)  # 记录取消订阅的邮箱
                     context = {"msg": "请查看邮箱，回复邮件即可取消对博客的订阅了。", "status": True}
                 except Exception as error:
