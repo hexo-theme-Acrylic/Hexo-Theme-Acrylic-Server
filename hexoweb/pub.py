@@ -733,21 +733,25 @@ def subscribe(request):
     if request.method != "POST":
         return
 
+    # 检查是否获取了验证码
     rev_mail = json.loads(request.body).get('mail')
     rev_name = json.loads(request.body).get('name')
+    verifi = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first()
+    if (not verifi):
+        return JsonResponse(safe=False, data={"msg": "请先获取验证码！", "status": True})
+
     rev_key = json.loads(request.body).get('key')
-    key = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first().key
     from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
     email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
     subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
 
-    if (not rev_mail or not rev_name or not key or 
-        rev_mail=='' or rev_name=='' or key==''):
+    if (not rev_mail or not rev_name or not verifi.key or 
+        rev_mail=='' or rev_name=='' or verifi.key==''):
         return
 
     try:
         if not subscriber:
-            if (rev_key == key):  # 验证码是否正确
+            if (rev_key == verifi.key):  # 验证码是否正确
                 register_succ = False
                 try:
                     send_custom_email(rev_mail, rev_name, from_email, email_passd, getSubscribeSuccessHtml(), 'html')  # 通知用户订阅成功
@@ -773,21 +777,25 @@ def cancelSubscribe(request):
     if request.method != "POST":
         return
 
+    # 检查是否获取了验证码
     rev_mail = json.loads(request.body).get('mail')
     rev_name = json.loads(request.body).get('name')
+    verifi = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first()
+    if (not verifi):
+        return JsonResponse(safe=False, data={"msg": "请先获取验证码！", "status": True})
+
     rev_key = json.loads(request.body).get('key')
-    key = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first().key
     from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
     email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
     subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
 
-    if (not rev_mail or not rev_name or not key or 
-        rev_mail=='' or rev_name=='' or key==''):
+    if (not rev_mail or not rev_name or not verifi.key or 
+        rev_mail=='' or rev_name=='' or verifi.key==''):
         return
 
     try:
         if subscriber:
-            if (rev_key == key):  # 验证码是否正确
+            if (rev_key == verifi.key):  # 验证码是否正确
                 try:
                     # 验证邮箱是否是有效可用的
                     send_custom_email(rev_mail, rev_name, from_email, email_passd, getCancelSubscribeHtml(), 'html')
