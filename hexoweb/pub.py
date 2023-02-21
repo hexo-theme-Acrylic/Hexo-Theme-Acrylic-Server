@@ -717,9 +717,9 @@ def getVerificationCode(request):
 
     try:
         send_custom_email(rev_mail, rev_name, from_email, email_passd, html, 'html')  # 验证邮箱是否是有效可用的
-        subscriber = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first()  # 查看是否已经订阅过
+        subscriber = VerificationCodeModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         if (subscriber):
-            VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).update(key=key)  # 记录验证码
+            VerificationCodeModel.objects.filter(mail=rev_mail).update(key=key)  # 记录验证码
         else:
             VerificationCodeModel.objects.create(mail=rev_mail, name=rev_name, key=key)  # 注册验证码
         context = {"msg": "请查看邮箱，验证码已发送！", "status": True}
@@ -736,7 +736,7 @@ def subscribe(request):
     # 检查是否获取了验证码
     rev_mail = json.loads(request.body).get('mail')
     rev_name = json.loads(request.body).get('name')
-    verifi = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first()
+    verifi = VerificationCodeModel.objects.filter(mail=rev_mail).first()
     if (not verifi):
         return JsonResponse(safe=False, data={"msg": "请先获取验证码！", "status": True})
 
@@ -780,7 +780,7 @@ def cancelSubscribe(request):
     # 检查是否获取了验证码
     rev_mail = json.loads(request.body).get('mail')
     rev_name = json.loads(request.body).get('name')
-    verifi = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first()
+    verifi = VerificationCodeModel.objects.filter(mail=rev_mail).first()
     if (not verifi):
         return JsonResponse(safe=False, data={"msg": "请先获取验证码！", "status": True})
 
