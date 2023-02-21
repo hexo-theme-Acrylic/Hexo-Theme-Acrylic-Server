@@ -98,6 +98,7 @@ urlpatterns = [
     path('pub/subscribe_sum/', pub.subscribe_sum, name='pub_subscribe_sum'),
     path('pub/cancelSubscribe/', pub.cancelSubscribe, name='pub_cancelSubscribe'),
     path('pub/getSubscribeSum/', pub.getSubscribeSum, name='pub_getSubscribeSum'),
+    path('pub/getVerificationCode/', pub.getVerificationCode, name='pub_getVerificationCode'),
 
     re_path(r'^(?!api)^(?!pub).*$\.*', pages, name='pages'),
 ]

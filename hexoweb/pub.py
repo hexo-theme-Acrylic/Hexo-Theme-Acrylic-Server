@@ -1,4 +1,5 @@
 import random
+from django.template import loader
 import django
 
 from django.core.mail import get_connection
@@ -9,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from core import settings
 
 from .functions import *
-from .models import CancelMailModel, EssayModel, ImageModel, MailModel, SettingModel
+from .models import EssayModel, ImageModel, MailModel, SettingModel, VerificationCodeModel
 
 
 # 保存内容 pub/save
@@ -696,29 +697,69 @@ def del_talk(request):
         context = {"msg": repr(error), "status": False}
     return JsonResponse(safe=False, data=context)
 
+# 获取验证码
+@csrf_exempt
+def getVerificationCode(request):
+    if request.method != "POST":
+        return
+
+    rev_mail = json.loads(request.body).get('mail')
+    rev_name = json.loads(request.body).get('name')
+    from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+    email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
+    key = ''.join(random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for x in range(12))
+    t=loader.get_template('home/subscribe_verification.html') 
+    html=t.render({'key':key})  #以字典形式传递数据并生成html
+
+    if (not rev_mail or not rev_name or
+        rev_mail=='' or rev_name==''):
+        return
+
+    try:
+        send_custom_email(rev_mail, rev_name, from_email, email_passd, html, 'html')  # 验证邮箱是否是有效可用的
+        subscriber = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first()  # 查看是否已经订阅过
+        if (subscriber):
+            VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).update(key=key)  # 记录验证码
+        else:
+            VerificationCodeModel.objects.create(mail=rev_mail, name=rev_name, key=key)  # 注册验证码
+        context = {"msg": "请查看邮箱，验证码已发送！", "status": True}
+    except Exception as error:
+        context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
+    return JsonResponse(safe=False, data=context)
+
 # 提交订阅邮箱 pub/subscribe
 @csrf_exempt
 def subscribe(request):
     if request.method != "POST":
         return
 
+    rev_mail = json.loads(request.body).get('mail')
+    rev_name = json.loads(request.body).get('name')
+    rev_key = json.loads(request.body).get('key')
+    key = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first().key
+    from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+    email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
+    subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
+
+    if (not rev_mail or not rev_name or not key or 
+        rev_mail=='' or rev_name=='' or key==''):
+        return
+
     try:
-        rev_mail = json.loads(request.body).get('mail')
-        rev_name = json.loads(request.body).get('name')
-        from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
-        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
-        subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         if not subscriber:
-            register_succ = False
-            try:
-                send_custom_email(rev_mail, rev_name, from_email, email_passd, getSubscribeSuccessHtml(), 'html')  # 验证邮箱是否是有效可用的
-                MailModel.objects.create(mail=rev_mail, name=rev_name)  # 注册订阅邮箱
-                register_succ = True
-                context = {"msg": "订阅成功邮件已发送至您的邮箱，请查收！", "status": True}
-            except Exception as error:
-                context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
-            if register_succ:
-                send_custom_email(from_email, None, from_email, email_passd, getNewSubscribeTipsHtml(), 'html')  # 通知博主
+            if (rev_key == key):  # 验证码是否正确
+                register_succ = False
+                try:
+                    send_custom_email(rev_mail, rev_name, from_email, email_passd, getSubscribeSuccessHtml(), 'html')  # 通知用户订阅成功
+                    MailModel.objects.create(mail=rev_mail, name=rev_name)  # 注册订阅邮箱
+                    register_succ = True
+                    context = {"msg": "订阅成功邮件已发送至您的邮箱，请查收！", "status": True}
+                except Exception as error:
+                    context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
+                if register_succ:
+                    send_custom_email(from_email, None, from_email, email_passd, getNewSubscribeTipsHtml(), 'html')  # 通知博主
+            else:
+                context = {"msg": "验证码错误！", "status": True}
         else:
             context = {"msg": "已订阅！", "status": True}
     except Exception as error:
@@ -732,24 +773,30 @@ def cancelSubscribe(request):
     if request.method != "POST":
         return
 
+    rev_mail = json.loads(request.body).get('mail')
+    rev_name = json.loads(request.body).get('name')
+    rev_key = json.loads(request.body).get('key')
+    key = VerificationCodeModel.objects.filter(mail=rev_mail, name=rev_name).first().key
+    from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
+    email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
+    subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
+
+    if (not rev_mail or not rev_name or not key or 
+        rev_mail=='' or rev_name=='' or key==''):
+        return
+
     try:
-        rev_mail = json.loads(request.body).get('mail')
-        rev_name = json.loads(request.body).get('name')
-        from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
-        email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
-        subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
-        cancelSubscriber = CancelMailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经取消订阅过
         if subscriber:
-            if cancelSubscriber:
-                context = {"msg": "已经提交您的请求，请及时回复邮件。", "status": True}
-            else:
+            if (rev_key == key):  # 验证码是否正确
                 try:
                     # 验证邮箱是否是有效可用的
                     send_custom_email(rev_mail, rev_name, from_email, email_passd, getCancelSubscribeHtml(), 'html')
-                    CancelMailModel.objects.create(mail=rev_mail, name=rev_name)  # 记录取消订阅的邮箱
-                    context = {"msg": "请查看邮箱，回复邮件即可取消对博客的订阅了。", "status": True}
+                    MailModel.objects.filter(mail=rev_mail).delete()  # 删除订阅邮箱
+                    context = {"msg": "取消订阅成功，感谢您一路相伴！", "status": True}
                 except Exception as error:
                     context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
+            else:
+                context = {"msg": "验证码错误！", "status": True}
         else:
             context = {"msg": "查询不到您的订阅邮箱！", "status": True}
     except Exception as error:
