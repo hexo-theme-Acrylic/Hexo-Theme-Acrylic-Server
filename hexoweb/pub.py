@@ -704,6 +704,9 @@ def getVerificationCode(request):
         return
 
     rev_mail = json.loads(request.body).get('mail')
+    if (not do_email_validator(rev_mail)):
+        return JsonResponse(safe=False, data={"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True})
+
     rev_name = json.loads(request.body).get('name')
     from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
     email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
@@ -733,8 +736,11 @@ def subscribe(request):
     if request.method != "POST":
         return
 
-    # 检查是否获取了验证码
     rev_mail = json.loads(request.body).get('mail')
+    if (not do_email_validator(rev_mail)):
+        return JsonResponse(safe=False, data={"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True})
+
+    # 检查是否获取了验证码
     rev_name = json.loads(request.body).get('name')
     verifi = VerificationCodeModel.objects.filter(mail=rev_mail).first()
     if (not verifi):
@@ -777,8 +783,11 @@ def cancelSubscribe(request):
     if request.method != "POST":
         return
 
-    # 检查是否获取了验证码
     rev_mail = json.loads(request.body).get('mail')
+    if (not do_email_validator(rev_mail)):
+        return JsonResponse(safe=False, data={"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True})
+
+    # 检查是否获取了验证码
     rev_name = json.loads(request.body).get('name')
     verifi = VerificationCodeModel.objects.filter(mail=rev_mail).first()
     if (not verifi):

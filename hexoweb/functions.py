@@ -5,6 +5,7 @@ import subprocess
 import unicodedata
 
 import django
+from email_validator import validate_email, EmailNotValidError
 from django.core.mail import get_connection
 from core.qexoSettings import ALL_SETTINGS
 import requests
@@ -962,6 +963,21 @@ def subscribe_sum():
     except Exception as error:
         logging.error(repr(error))
     return 0
+
+# email-validator 验证邮箱格式与域名
+def do_email_validator(email):
+    try:
+        # Validate.
+        valid = validate_email(email)
+        # Update with the normalized form.
+        email = valid.email
+    except EmailNotValidError as e:
+        # email is not valid, exception message is human-readable
+        print("except:", str(e))
+        return False
+
+    print("email:", email)
+    return True
 
 # 发送邮件
 def send_custom_email(rev_mail, rev_name, from_email, email_passd, content, content_subtype):
