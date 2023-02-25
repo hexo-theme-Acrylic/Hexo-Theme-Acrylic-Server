@@ -297,6 +297,7 @@
                 url: '/api/send_email/',
                 method: 'get',
                 dataType: 'json',
+                timeout: 60000,
                 success: function (res) {
                     loading.destroy();
                     if (res.status) {
