@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from core import settings
 
 from .functions import *
-from .models import EssayModel, ImageModel, MailModel, SettingModel, VerificationCodeModel
+from .models import EssayModel, ImageModel, MailModel, PostLikeModel, SettingModel, VerificationCodeModel
 
 
 # 保存内容 pub/save
@@ -825,3 +825,37 @@ def cancelSubscribe(request):
 @csrf_exempt
 def getSubscribeSum(request):
     return JsonResponse(safe=False, data={"msg": subscribe_sum(), "status": True})
+
+# 设置文章点赞
+@csrf_exempt
+def set_postlike(request):
+    if request.method != "POST":
+        return
+
+    try:
+        postname = json.loads(request.body).get('postname')
+        postlikemodel = PostLikeModel.objects.filter(postName=postname).first()
+        if (not postlikemodel):
+            return JsonResponse(safe=False, data={"msg": "文章未创建点赞功能！", "status": False})
+        postlikemodel.like += 1
+        count = postlikemodel.like
+        postlikemodel.save()
+    except Exception as error:
+        return JsonResponse(safe=False, data={"msg": "点赞发生错误，请检查数据库或网络！", "status": False})
+    return JsonResponse(safe=False, data={"msg": count, "status": True})
+
+# 获取文章点赞数
+@csrf_exempt
+def get_postlike(request):
+    if request.method != "POST":
+        return
+
+    try:
+        postname = json.loads(request.body).get('postname')
+        postlikemodel = PostLikeModel.objects.filter(postName=postname).first()
+        if (not postlikemodel):
+            return JsonResponse(safe=False, data={"msg": "文章未创建点赞功能！", "status": False})
+        count = postlikemodel.like
+    except Exception as error:
+        return JsonResponse(safe=False, data={"msg": "获取点赞数失败，请检查数据库或网络！", "status": True})
+    return JsonResponse(safe=False, data={"msg": count, "status": True})

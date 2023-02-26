@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from core import settings
+from hexoweb.models import PostLikeModel
 from .functions import *
 
 
@@ -937,3 +938,59 @@ def send_email(request):
     for to_email in MailModel.objects.all():
         send_custom_email(to_email.mail, to_email.name, from_email, email_passd, html_content, 'html')
     return JsonResponse(safe=False, data={"msg":"OK，邮件已经发送完成。", "status":"true"})
+
+# 保存点赞位
+@login_required(login_url="/login/")
+def save_postlike(request):
+    if request.method != "POST":
+        return
+
+    postname = request.POST.get("postname")
+    postlike = PostLikeModel.objects.filter(postName=postname).first()  # 查看是否已经订阅过
+    if (not postlike):
+        try:
+            PostLikeModel.objects.create(postName=postname)    
+            return JsonResponse(safe=False, data={"msg":"OK，创建点赞位成功。", "status":True})
+        except Exception as error:
+            return JsonResponse(safe=False, data={"msg":"数据库插入记录失败。", "status":False})
+    return JsonResponse(safe=False, data={"msg":"点赞位已经存在", "status":False})
+
+# 删除点赞位
+@login_required(login_url="/login/")
+def delete_postlike(request):
+    if request.method != "POST":
+        return
+
+    postname = request.POST.get("postname")
+    postlike = PostLikeModel.objects.filter(postName=postname).first()  # 查看是否已经订阅过
+    if (postlike):
+        try:
+            PostLikeModel.objects.filter(postName=postname).delete()
+            return JsonResponse(safe=False, data={"msg":"OK，删除点赞位成功。", "status":True})
+        except Exception as error:
+            return JsonResponse(safe=False, data={"msg":"数据库删除记录失败。", "status":False})
+    return JsonResponse(safe=False, data={"msg":"点赞位不存在！", "status":False})
+
+# 修改点赞位
+@login_required(login_url="/login/")
+def change_postlike(request):
+    if request.method != "POST":
+        return
+
+    print("进入")
+    postname = request.POST.get("postname")
+    content = request.POST.get("content")
+    print("正在查询")
+    postlike = PostLikeModel.objects.filter(postName=postname).first()  # 查看是否已经订阅过
+    if (postlike):
+        try:
+            print("修改值：", content)
+            print("文章名称：", postname)
+            PostLikeModel.objects.filter(postName=postname).update(postName=content)
+            print("修改")
+            return JsonResponse(safe=False, data={"msg":"OK，修改点赞位成功。", "status":True})
+        except Exception as error:
+            print("异常")
+            return JsonResponse(safe=False, data={"msg":"数据库修改记录失败。", "status":False})
+    print("查询不到")
+    return JsonResponse(safe=False, data={"msg":"点赞位不存在！", "status":False})
