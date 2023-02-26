@@ -111,6 +111,16 @@
         var posts = {{ posts|safe }};
         var _page = 1;
 
+        var compare = function (x, y) {
+            if (x["postName"] < y["postName"]) {
+                return -1;
+            } else if (x["postName"] > y["postName"]) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
         function scrollToTop() {
             let timer = null;
             cancelAnimationFrame(timer);
@@ -275,7 +285,7 @@
                     loading.destroy();
                     if (res.status) {
                         notyf.success(res.msg);
-                        posts.push({"name": name, "content": content});
+                        posts.push({"postName": postname, "like": 0});
                         posts.sort(compare);
                         change_page(_page);
                         $("#count").html(posts.length);
