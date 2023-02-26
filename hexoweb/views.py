@@ -601,6 +601,18 @@ def pages(request):
             context["post_number"] = len(posts)
             context["page_number"] = ceil(context["post_number"] / 15)
             context["search"] = search
+        elif "post_like" in load_template:
+            posts = []
+            postlike = PostLikeModel.objects.all()
+
+            for i in postlike:
+                posts.append({"postName": i.postName,
+                                "like": i.like,
+                            })
+
+            context["posts"] = posts
+            context["post_number"] = len(posts)
+            context["page_number"] = ceil(context["post_number"] / 15)
         elif "talks" in load_template:
             search = request.GET.get("s")
             posts = []

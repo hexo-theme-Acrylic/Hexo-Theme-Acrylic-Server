@@ -82,3 +82,7 @@ class VerificationCodeModel(models.Model):
 class MailModel(models.Model):
     mail=models.CharField(primary_key=True, max_length=50, verbose_name='邮箱')
     name=models.CharField(unique=False, max_length=30, verbose_name='名称')
+
+class PostLikeModel(models.Model):
+    postName=models.CharField(primary_key=True, max_length=50, verbose_name='文章名称')
+    like=models.IntegerField(default=0)

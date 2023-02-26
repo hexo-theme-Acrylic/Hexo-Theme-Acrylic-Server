@@ -64,6 +64,9 @@ urlpatterns = [
     path('api/del_talk/', del_talk, name='del_talk'),
     path('api/run_online_script/', run_online_script, name='run_online_script'),
     path('api/send_email/', send_email, name="send_email"),
+    path('api/save_postlike/', save_postlike, name="save_postlike"),
+    path('api/delete_postlike/', delete_postlike, name="delete_postlike"),
+    path('api/change_postlike/', change_postlike, name="change_postlike"),
 
     path('pub/save/', pub.save, name='pub_save'),
     path('pub/save_post/', pub.save_post, name='pub_save_post'),
@@ -99,6 +102,8 @@ urlpatterns = [
     path('pub/cancelSubscribe/', pub.cancelSubscribe, name='pub_cancelSubscribe'),
     path('pub/getSubscribeSum/', pub.getSubscribeSum, name='pub_getSubscribeSum'),
     path('pub/getVerificationCode/', pub.getVerificationCode, name='pub_getVerificationCode'),
+    path('pub/set_postlike/', pub.set_postlike, name='pub_set_postlike'),
+    path('pub/get_postlike/', pub.get_postlike, name='pub_get_postlike'),
 
     re_path(r'^(?!api)^(?!pub).*$\.*', pages, name='pages'),
 ]
