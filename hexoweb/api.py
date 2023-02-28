@@ -936,7 +936,7 @@ def send_email(request):
     email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
     html_content = getSubscribeHtml()
     for to_email in MailModel.objects.all():
-        send_custom_email(to_email.mail, to_email.name, from_email, email_passd, html_content, 'html')
+        SendMail(to_email.mail, to_email.name, from_email, email_passd, html_content, 'html').start()
     return JsonResponse(safe=False, data={"msg":"OK，邮件已经发送完成。", "status":"true"})
 
 # 保存点赞位
