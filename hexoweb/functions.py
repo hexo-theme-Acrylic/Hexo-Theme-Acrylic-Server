@@ -40,6 +40,7 @@ import shutil
 from bs4 import BeautifulSoup
 from html import escape
 import logging
+import threading
 
 disable_warnings()
 
@@ -995,6 +996,26 @@ def send_custom_email(rev_mail, rev_name, from_email, email_passd, content, cont
     )
     msg.content_subtype = content_subtype
     msg.send()
+
+class SendMail(threading.Thread):
+    def __init__(self,rev_mail, rev_name, from_email, email_passd, content, content_subtype):
+        self.rev_mail = rev_mail
+        self.rev_name = rev_name
+        self.from_email = from_email
+        self.email_passd = email_passd
+        self.content = content
+        self.content_subtype = content_subtype
+        threading.Thread.__init__(self)
+
+    def run(self):
+        send_custom_email(
+            self.rev_mail,
+            self.rev_name,
+            self.from_email,
+            self.email_passd,
+            self.content,
+            self.content_subtype
+        )
 
 # print(" ......................阿弥陀佛......................\n" +
 #       "                       _oo0oo_                      \n" +
