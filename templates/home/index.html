@@ -146,7 +146,7 @@
                                     </div>
                                     <div class="col-auto">
                                         <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
-                                            <a class="ni-ni-chart-bar-32" href="javascript:query_sendemail();" role="button">
+                                            <a class="ni-ni-chart-bar-32" href="javascript:query_emailcontent();" role="button">
                                                 <i class="ni ni-chart-bar-32"></i>
                                             </a>
                                         </div>
@@ -257,6 +257,31 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="queryEmailContent" tabindex="-1" aria-labelledby="querySendEmailLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="querySendEmailLabel">文章信息</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div> 文章标题: <input type="text" name="posttile" id="posttile" /> </div>
+                        <div> 文章简介: <input type="text" name="postdocs" id="postdocs" /> </div>
+                        <div> 文章链接: <input type="text" name="postlink" id="postlink" /> </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="query_sendemail()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="modal fade" id="querySendEmail" tabindex="-1" aria-labelledby="querySendEmailLabel"
              aria-hidden="true">
             <div class="modal-dialog">
@@ -291,11 +316,15 @@
 {% block javascripts %}
     <script>
         function subscribe() {
+            let posttile = $("#posttile").val();
+            let postdocs = $("#postdocs").val();
+            let postlink = $("#postlink").val();
             let loading = new KZ_Loading("正在发送订阅邮件中");
             loading.show();
             $.ajax({
                 url: '/api/send_email/',
-                method: 'get',
+                method: 'post',
+                data: {"posttile": posttile, "postdocs": postdocs, "postlink": postlink,},
                 dataType: 'json',
                 timeout: 60000,
                 success: function (res) {
@@ -316,5 +345,9 @@
         function query_sendemail() {
             $("#querySendEmail").modal("show");
         }
+        function query_emailcontent() {
+            $("#queryEmailContent").modal("show");
+        }
+
     </script>
 {% endblock javascripts %}
