@@ -12,7 +12,6 @@ from core import settings
 from .functions import *
 from .models import EssayModel, ImageModel, MailModel, PostLikeModel, SettingModel, VerificationCodeModel
 
-
 # 保存内容 pub/save
 @csrf_exempt
 def save(request):
@@ -707,6 +706,10 @@ def getVerificationCode(request):
     if (not do_email_validator(rev_mail)):
         return JsonResponse(safe=False, data={"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True})
 
+    isvalid, curvalidtime = isInValidTime(rev_mail)
+    if (isvalid):
+        return JsonResponse(safe=False, data={"msg": "请"+str(curvalidtime)+"秒后重新获取！", "status": True})
+
     rev_name = json.loads(request.body).get('name')
     from_email = SettingModel.objects.get(name="EMAIL_HOST_USER").content
     email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
@@ -714,17 +717,25 @@ def getVerificationCode(request):
     t=loader.get_template('home/subscribe_verification.html') 
     html=t.render({'key':key})  #以字典形式传递数据并生成html
 
+    # 检查数据是否为空
     if (not rev_mail or not rev_name or
         rev_mail=='' or rev_name==''):
         return
 
+    # 发送验证码，并捕获授权码异常
     try:
         send_custom_email(rev_mail, rev_name, from_email, email_passd, html, 'html')  # 验证邮箱是否是有效可用的
+    except Exception as error:
+        context = {"msg": "订阅接口正在修复！", "status": False}
+        return JsonResponse(safe=False, data=context)
+
+    # 修改创建数据
+    try:
         subscriber = VerificationCodeModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
         if (subscriber):
-            VerificationCodeModel.objects.filter(mail=rev_mail).update(key=key)  # 记录验证码
+            VerificationCodeModel.objects.filter(mail=rev_mail).update(key=key, validtime=(time()+60))  # 记录验证码
         else:
-            VerificationCodeModel.objects.create(mail=rev_mail, name=rev_name, key=key)  # 注册验证码
+            VerificationCodeModel.objects.create(mail=rev_mail, name=rev_name, key=key, validtime=(time()+60))  # 注册验证码
         context = {"msg": "请查看邮箱，验证码已发送！", "status": True}
     except Exception as error:
         context = {"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True}
@@ -740,6 +751,10 @@ def subscribe(request):
     if (not do_email_validator(rev_mail)):
         return JsonResponse(safe=False, data={"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True})
 
+    isvalid, curvalidtime = isInValidTime(rev_mail)
+    if (not isvalid):
+        return JsonResponse(safe=False, data={"msg": "验证码已过期！", "status": True})
+
     # 检查是否获取了验证码
     rev_name = json.loads(request.body).get('name')
     verifi = VerificationCodeModel.objects.filter(mail=rev_mail).first()
@@ -751,10 +766,12 @@ def subscribe(request):
     email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
     subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
 
+    # 检查数据是否为空
     if (not rev_mail or not rev_name or not verifi.key or 
         rev_mail=='' or rev_name=='' or verifi.key==''):
         return
 
+    # 发送订阅成功邮件，并创建数据
     try:
         if not subscriber:
             if (rev_key == verifi.key):  # 验证码是否正确
@@ -786,6 +803,10 @@ def cancelSubscribe(request):
     rev_mail = json.loads(request.body).get('mail')
     if (not do_email_validator(rev_mail)):
         return JsonResponse(safe=False, data={"msg": "输入的邮箱有误请检查邮箱是否正确！", "status": True})
+    
+    isvalid, curvalidtime = isInValidTime(rev_mail)
+    if (not isvalid):
+        return JsonResponse(safe=False, data={"msg": "验证码已过期！", "status": True})
 
     # 检查是否获取了验证码
     rev_name = json.loads(request.body).get('name')
@@ -798,10 +819,12 @@ def cancelSubscribe(request):
     email_passd = SettingModel.objects.get(name="EMAIL_HOST_PASSWORD").content
     subscriber = MailModel.objects.filter(mail=rev_mail).first()  # 查看是否已经订阅过
 
+    # 检查数据是否为空
     if (not rev_mail or not rev_name or not verifi.key or 
         rev_mail=='' or rev_name=='' or verifi.key==''):
         return
 
+    # 发送订阅成功邮件，并创建数据
     try:
         if subscriber:
             if (rev_key == verifi.key):  # 验证码是否正确
