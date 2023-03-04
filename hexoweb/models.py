@@ -75,11 +75,10 @@ class EssayModel(models.Model):
     values = models.TextField(max_length=0x7FFFFFFF, default="{}")
 
 class VerificationCodeModel(models.Model):
-    managed = True
     mail=models.CharField(primary_key=True, max_length=50, verbose_name='邮箱')
     name=models.CharField(unique=False, max_length=30, verbose_name='名称')
     key=models.CharField(unique=False, max_length=30, verbose_name='验证码')
-    validtime=models.IntegerField(default=0, verbose_name='有效期')
+    validtime=models.IntegerField(default=0)
 
 class MailModel(models.Model):
     mail=models.CharField(primary_key=True, max_length=50, verbose_name='邮箱')
