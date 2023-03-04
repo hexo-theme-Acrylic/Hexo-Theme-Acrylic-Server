@@ -12,7 +12,7 @@ import requests
 from django.template.defaulttags import register
 from django.core.management import execute_from_command_line
 from core.qexoSettings import QEXO_VERSION
-from .models import Cache, MailModel, SettingModel, FriendModel, NotificationModel, CustomModel, StatisticUV, StatisticPV, ImageModel, TalkModel
+from .models import Cache, MailModel, SettingModel, FriendModel, NotificationModel, CustomModel, StatisticUV, StatisticPV, ImageModel, TalkModel, VerificationCodeModel
 import github
 import json
 import uuid
@@ -41,6 +41,7 @@ from bs4 import BeautifulSoup
 from html import escape
 import logging
 import threading
+from django.template import loader
 
 disable_warnings()
 
@@ -941,8 +942,11 @@ def escapeString(_str):
     return escape(_str)
 
 # 获取发送订阅邮件的html模板
-def getSubscribeHtml():
-    return '<!DOCTYPE html> <html lang = "en"> <head> <base target="_blank" /> <style id="scrollbar" type="text/css"> ::-webkit-scrollbar { width: 0 !important } pre { white-space: pre-wrap !important; word-wrap: break-word !important; *white-space: normal !important } #letter img { max-width: 300px } </style> <style id="from-wrapstyle" type="text/css"> #form-wrap { overflow: hidden; height: 447px; position: relative; top: 0px; transition: all 1s ease-in-out.3s; z-index: 0 } </style> <style id="from-wraphoverstyle" type="text/css"> #form-wrap:hover { height: 1300px; top: -200px } </style> </head> <body> <div style="width: 530px;margin: 20px auto 0;height: 1000px;"> <div id="form-wrap"><img src="https://npm.elemecdn.com/hexo-butterfly-envelope/lib/before.png" alt="before" style="position: absolute;bottom: 126px;left: 0px;background-repeat: no-repeat;width: 530px;height: 317px;z-index:-100"> <div style="position: relative;overflow: visible;height: 1500px;width: 500px;margin: 0px auto;transition: all 1s ease-in-out .3s;padding-top:200px;"> <form> <div style="background: white;width: 95%;max-width: 800px;margin: auto auto;border-radius: 5px;border: 1px solid;overflow: hidden;-webkit-box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.12);box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.18);"> <img style="width:100%;overflow: hidden;" src="https://npm.elemecdn.com/hexo-butterfly-envelope/lib/violet.jpg" /> <div style="padding: 5px 20px;"><br> <div> <h3 style="text-decoration: none; color: rgb(246, 214, 175);">来自Shine的博客的订阅信息:</h3> </div><br><br> <div id="letter" style="overflow:auto;height:300px;width:100%;display:block;word-break: break-all;word-wrap: break-word;"> <div style="border-bottom: #ddd 1px solid;border-left: #ddd 1px solid;padding-bottom: 20px;background-color: #eee;margin: 15px 0px;padding-left: 20px;padding-right: 20px;border-top: #ddd 1px solid;border-right: #ddd 1px solid;padding-top: 20px;font-family: " Arial", "Microsoft YaHei" , "黑体" , "宋体" , sans-serif;">Shine的博客发布了新文章哦~！</div> </div> <div style="text-align: center;margin-top: 40px;"><img src="https://npm.elemecdn.com/hexo-butterfly-envelope/lib/line.png" alt="hr" style="width:100%; margin:5px auto 5px auto; display: block;" /><a style="text-transform: uppercase;text-decoration: none;font-size: 14px;border: 2px solid #6c7575;color: #2f3333;padding: 10px;display: inline-block;margin: 10px auto 0;background-color: rgb(246, 214, 175);" href="blog.shinyu.cn" target="_blank" > Shine｜请您过目~</a></div> <p style="font-size: 12px;text-align: center;color: #999;">自动书记人偶竭诚为您服务！<br>©2020<a style="text-decoration:none; color:rgb(246, 214, 175)" href="blog.shinyu.cn">Shine - 热爱生活点滴，分享精彩时刻</a></p> </div> </div> </form> </div><img src="https://npm.elemecdn.com/hexo-butterfly-envelope/lib/after.png" alt="after" style="      position: absolute;bottom: -2px;left: 0;background-repeat: no-repeat;width: 530px;height: 259px;z-index:100"> </div> </div> </body> </html>'
+def getSubscribeHtml(request, postTitle, postIntroduction, postLink):
+    t=loader.get_template('home/send_subscribe_email.html') 
+
+    html=t.render({'postTitle':postTitle, 'postIntroduction':postIntroduction, 'postLink':postLink}, request)  #以字典形式传递数据并生成html
+    return html
 
 # 获取发送订阅邮箱成功的html模板
 def getSubscribeSuccessHtml():
@@ -976,13 +980,11 @@ def do_email_validator(email):
         # email is not valid, exception message is human-readable
         print("except:", str(e))
         return False
-
-    print("email:", email)
     return True
 
 # 发送邮件
 def send_custom_email(rev_mail, rev_name, from_email, email_passd, content, content_subtype):
-    subject = 'Shine的博客订阅验证'
+    subject = 'Shine的博客订阅通知'
     msg = django.core.mail.EmailMessage(
         subject, 
         content, 
@@ -1016,6 +1018,21 @@ class SendMail(threading.Thread):
             self.content,
             self.content_subtype
         )
+
+# 判断验证码的有效期
+def isInValidTime(mail):
+    #查询邮箱是否存在
+    subscriber = VerificationCodeModel.objects.filter(mail=mail).first()
+    nowtime = int(time())
+    if (subscriber and subscriber.validtime != 0):
+        validtime = subscriber.validtime
+        if (validtime >= nowtime):
+            return True, (validtime - nowtime) #有效期内
+        else:
+            return False, 0 #有效期外
+    else:
+        return False, 0
+
 
 # print(" ......................阿弥陀佛......................\n" +
 #       "                       _oo0oo_                      \n" +
