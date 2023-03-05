@@ -245,16 +245,16 @@
             let loading = new KZ_Loading('正在删除中...');
             loading.show();
             $.ajax({
-                url: '/api/login_required/',
+                url: '/api/delete_postlike/',
                 method: 'post',
-                data: {"postname": postname},
+                data: {"postname": name},
                 dataType: "json",
                 success: function (res) {
                     loading.destroy();
                     if (res.status) {
                         notyf.success(res.msg);
                         for (let i = 0; i < posts.length; i++) {
-                            if (posts[i]["name"] === name) {
+                            if (posts[i]["postName"] === name) {
                                 posts.splice(i, 1);
                                 change_page(_page);
                                 break;
