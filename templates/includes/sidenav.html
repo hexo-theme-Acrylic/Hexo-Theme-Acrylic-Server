@@ -70,6 +70,12 @@
               <span class="nav-link-text">文章点赞</span>
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'subscribe' in segment %} active {% endif %}" href="/subscribe.html">
+              <i class="ni ni-chat-round text-purple"></i>
+              <span class="nav-link-text">订阅</span>
+            </a>
+          </li>
         {% if request.user.is_staff %}
           <li class="nav-item">
             <a class="nav-link {% if 'custom' in segment %} active {% endif %}" href="/custom.html">

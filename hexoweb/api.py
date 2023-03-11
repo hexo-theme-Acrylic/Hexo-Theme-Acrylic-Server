@@ -990,3 +990,36 @@ def change_postlike(request):
         except Exception as error:
             return JsonResponse(safe=False, data={"msg":"数据库修改记录失败。", "status":False})
     return JsonResponse(safe=False, data={"msg":"点赞位不存在！", "status":False})
+
+# 删除订阅读者
+@login_required(login_url="/login/")
+def delete_subscriber(request):
+    if request.method != "POST":
+        return
+
+    mail = request.POST.get("mail")
+    subscriber = MailModel.objects.filter(mail=mail).first()  # 查看是否已经订阅过
+    if (subscriber):
+        try:
+            MailModel.objects.filter(mail=mail).delete()
+            return JsonResponse(safe=False, data={"msg":"OK，删除订阅读者成功。", "status":True})
+        except Exception as error:
+            return JsonResponse(safe=False, data={"msg":"数据库删除记录失败。", "status":False})
+    return JsonResponse(safe=False, data={"msg":"订阅读者不存在！", "status":False})
+
+# 修改订阅读者
+@login_required(login_url="/login/")
+def change_subscriber(request):
+    if request.method != "POST":
+        return
+
+    name = request.POST.get("name")
+    mail = request.POST.get("mail")
+    subscriber = MailModel.objects.filter(mail=mail).first()  # 查看是否已经订阅过
+    if (subscriber):
+        try:
+            MailModel.objects.filter(mail=mail).update(name=name, mail=mail)
+            return JsonResponse(safe=False, data={"msg":"OK，修改订阅读者成功。", "status":True})
+        except Exception as error:
+            return JsonResponse(safe=False, data={"msg":"数据库修改记录失败。", "status":False})
+    return JsonResponse(safe=False, data={"msg":"订阅读者不存在！", "status":False})
