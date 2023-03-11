@@ -613,6 +613,18 @@ def pages(request):
             context["posts"] = posts
             context["post_number"] = len(posts)
             context["page_number"] = ceil(context["post_number"] / 15)
+        elif "subscribe" in load_template:
+            posts = []
+            postlike = MailModel.objects.all()
+
+            for i in postlike:
+                posts.append({"name": i.name,
+                                "mail": i.mail,
+                            })
+
+            context["posts"] = posts
+            context["post_number"] = len(posts)
+            context["page_number"] = ceil(context["post_number"] / 15)
         elif "talks" in load_template:
             search = request.GET.get("s")
             posts = []
