@@ -79,4 +79,7 @@ ALL_SETTINGS = [  # [名称, 默认值, 是否在尝试修复时重置, 简介]
     ["JUMP_UPDATE", "false", False, "是否转跳到更新界面"],
     ["EMAIL_HOST_PASSWORD", "", False, "QQ邮箱授权码"],
     ["EMAIL_HOST_USER", "", False, "QQ邮箱号"],
+    ["EMAIL_SENDER_NAME", "", False, "发件人"],
+    ["EMAIL_MAIL_SUBJECT", "", False, "邮件Title"],
+    ["EMAIL_MAIL_CONTENT", "", False, "邮件内容"],
 ]

@@ -42,6 +42,8 @@ from html import escape
 import logging
 import threading
 from django.template import loader
+from email.utils import formataddr
+from django.template import Template, Context
 
 disable_warnings()
 
@@ -938,9 +940,13 @@ def escapeString(_str):
 
 # 获取发送订阅邮件的html模板
 def getSubscribeHtml(request, postTitle, postIntroduction, postLink):
-    t=loader.get_template('home/send_subscribe_email.html') 
-
-    html=t.render({'postTitle':postTitle, 'postIntroduction':postIntroduction, 'postLink':postLink}, request)  #以字典形式传递数据并生成html
+    t = Template(SettingModel.objects.get(name="EMAIL_MAIL_CONTENT").content)
+    avgs = {
+        'postTitle':postTitle,
+        'postIntroduction':postIntroduction,
+        'postLink':postLink
+    }
+    html=t.render(Context(avgs))  #以字典形式传递数据并生成html
     return html
 
 # 获取发送订阅邮箱成功的html模板
@@ -979,11 +985,12 @@ def do_email_validator(email):
 
 # 发送邮件
 def send_custom_email(rev_mail, rev_name, from_email, email_passd, content, content_subtype):
-    subject = 'Shine的博客订阅通知'
+    sender = SettingModel.objects.get(name="EMAIL_SENDER_NAME").content
+    subject = SettingModel.objects.get(name="EMAIL_MAIL_SUBJECT").content
     msg = django.core.mail.EmailMessage(
         subject, 
         content, 
-        from_email, 
+        formataddr(pair=(sender, from_email)),
         [rev_mail],
         connection=get_connection(
             username=from_email,
