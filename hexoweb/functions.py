@@ -12,7 +12,7 @@ import requests
 from django.template.defaulttags import register
 from django.core.management import execute_from_command_line
 from core.qexoSettings import QEXO_VERSION
-from .models import Cache, MailModel, SettingModel, FriendModel, NotificationModel, CustomModel, StatisticUV, StatisticPV, ImageModel, TalkModel, VerificationCodeModel
+from .models import Cache, MailModel, SentMailModel, SettingModel, FriendModel, NotificationModel, CustomModel, StatisticUV, StatisticPV, ImageModel, TalkModel, VerificationCodeModel
 import github
 import json
 import uuid
@@ -975,6 +975,15 @@ def subscribe_sum():
         logging.error(repr(error))
     return 0
 
+# 发送订阅邮件总数
+def send_subscribe_sum():
+    try:
+        sum = SentMailModel.objects.all().count()
+        return sum
+    except Exception as error:
+        logging.error(repr(error))
+    return 0
+
 # email-validator 验证邮箱格式与域名
 def do_email_validator(email):
     try:
@@ -990,6 +999,7 @@ def do_email_validator(email):
 
 # 发送邮件
 def send_custom_email(rev_mail, rev_name, from_email, email_passd, content, content_subtype):
+    sendtime = int(time())
     sender = SettingModel.objects.get(name="EMAIL_SENDER_NAME").content
     subject = SettingModel.objects.get(name="EMAIL_MAIL_SUBJECT").content
     msg = django.core.mail.EmailMessage(
@@ -1005,6 +1015,7 @@ def send_custom_email(rev_mail, rev_name, from_email, email_passd, content, cont
     )
     msg.content_subtype = content_subtype
     msg.send()
+    SentMailModel.objects.create(sendermail=from_email, sendername=sender, revmail=rev_mail, revname=rev_name, sendtime=sendtime)  # 记录发送订阅邮件信息
 
 class SendMail(threading.Thread):
     def __init__(self,rev_mail, rev_name, from_email, email_passd, content, content_subtype):
