@@ -87,3 +87,11 @@ class MailModel(models.Model):
 class PostLikeModel(models.Model):
     postName=models.CharField(primary_key=True, max_length=50, verbose_name='文章名称')
     like=models.IntegerField(default=0)
+
+class SentMailModel(models.Model):
+    id = models.AutoField(primary_key=True)
+    sendermail=models.CharField(max_length=50, verbose_name='发送者邮箱')
+    sendername=models.CharField(max_length=30, verbose_name='发送者名称')
+    revmail=models.CharField(max_length=50, verbose_name='接收者邮箱')
+    revname=models.CharField(max_length=30, verbose_name='接收者名称')
+    sendtime=models.IntegerField(default=0, verbose_name='发送时间')
