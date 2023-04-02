@@ -390,6 +390,7 @@ def index(request):
     context["post_number"] = str(len(posts))
     context["images_number"] = str(len(images))
     context["sub_sum"] = subscribe_sum()
+    context["send_sum"] = send_subscribe_sum()
     save_setting("LAST_LOGIN", str(int(time())))
     html_template = loader.get_template('home/index.html')
     return HttpResponse(html_template.render(context, request))
